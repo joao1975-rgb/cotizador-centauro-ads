@@ -301,7 +301,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
       </div>
       <div style="overflow-x:auto">
         <table class="table" id="tbl">
-          <thead><tr><th style="min-width:220px">Concepto</th><th>Categoría</th><th>Moneda</th><th title="Mutuamente excluyente con CAPEX">Costo Unit.</th><th>Cant.</th><th>Días</th><th title="Activa CAPEX, desactiva Costo Unit.">Propio</th><th title="Mutuamente excluyente con Costo Unit.">CAPEX</th><th title="Vida útil en eventos">Vida·Ev</th><th>Total</th><th>Costo (USD-Paralelo)</th><th></th></tr></thead>
+          <thead><tr><th style="min-width:220px">Concepto</th><th>Categoría</th><th>Moneda</th><th title="Mutuamente excluyente con CAPEX">Costo Unit.</th><th>Cant.</th><th style="min-width:80px">Días</th><th title="Activa CAPEX, desactiva Costo Unit.">Propio</th><th style="min-width:120px" title="Mutuamente excluyente con Costo Unit.">CAPEX</th><th title="Vida útil en eventos">Vida·Ev</th><th>Total</th><th>Costo (USD-Paralelo)</th><th></th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -316,27 +316,34 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
   <!-- ============ PANEL: MARGEN / P&L ============ -->
   <section class="panel" id="panel-margen">
     <div class="section-title">Estado de Resultados (P&L) del Proyecto</div>
-    <div class="section-subtitle">Define el precio de venta al cliente en USD. El sistema calcula los ingresos netos en cada escenario de moneda, el margen bruto, el precio diario y el ingreso bruto con impuestos.</div>
-
-    <div class="card" style="margin-bottom:20px;padding:20px 24px">
-      <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-        <div class="field" style="flex:1;min-width:200px">
-          <label class="field-label">Precio de Venta al Cliente (USD, sin IVA)</label>
-          <input class="pl-input" type="number" id="ingreso_propuesto" value="0" step="100" oninput="save();calcular()" style="font-size:20px;padding:14px 16px">
-          <span class="field-hint">Este es tu precio al cliente. Los 3 escenarios abajo muestran el ingreso neto efectivo según cómo cobra Centauro.</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;text-align:center">
-          <span class="field-label">Sugerido (costo × 1.35)</span>
-          <button class="btn btn-ghost btn-sm" onclick="sugerirIngreso(1.35)">Aplicar +35%</button>
-          <button class="btn btn-ghost btn-sm" onclick="sugerirIngreso(1.50)">Aplicar +50%</button>
-        </div>
-      </div>
-    </div>
+    <div class="section-subtitle">Los costos se muestran en <b>USD-Paralelo</b>. El <b>Margen Bruto %</b> define el precio de venta (Break-even pricing: Ingreso = Costo / (1 − Margen%)). Los ingresos se expresan en cada moneda de cobro.</div>
 
     <div class="table-wrap" style="margin-bottom:24px">
       <div style="overflow-x:auto">
         <table class="pl-table" id="pl-table">
-          <thead><tr><th style="min-width:280px">Concepto</th><th style="min-width:140px;text-align:right">USD/Bs (BCV)</th><th style="min-width:140px;text-align:right">EUR/Bs (BCV)</th><th style="min-width:140px;text-align:right">USD/Paralelo</th></tr></thead>
+          <thead>
+            <tr>
+              <th style="min-width:280px" rowspan="2">Concepto</th>
+              <th colspan="3" style="text-align:center;background:linear-gradient(135deg,rgba(139,63,183,0.25),rgba(245,158,11,0.15));font-size:14px;letter-spacing:0.08em;padding:14px">MARGEN BRUTO</th>
+            </tr>
+            <tr>
+              <th style="min-width:160px;text-align:center;padding:8px 10px">
+                <div style="font-size:10px;margin-bottom:6px">USD / BCV</div>
+                <input class="pl-input" type="number" id="mg_pct_bcv" value="35" step="0.5" style="width:80px;text-align:center;font-size:16px;margin:0 auto;display:block" oninput="save();calcular()">
+                <div style="font-size:9px;color:var(--text-3);margin-top:3px">%</div>
+              </th>
+              <th style="min-width:160px;text-align:center;padding:8px 10px">
+                <div style="font-size:10px;margin-bottom:6px">EUR / BCV</div>
+                <input class="pl-input" type="number" id="mg_pct_eur" value="35" step="0.5" style="width:80px;text-align:center;font-size:16px;margin:0 auto;display:block" oninput="save();calcular()">
+                <div style="font-size:9px;color:var(--text-3);margin-top:3px">%</div>
+              </th>
+              <th style="min-width:160px;text-align:center;padding:8px 10px">
+                <div style="font-size:10px;margin-bottom:6px">USD / Paralelo</div>
+                <input class="pl-input" type="number" id="mg_pct_par" value="35" step="0.5" style="width:80px;text-align:center;font-size:16px;margin:0 auto;display:block" oninput="save();calcular()">
+                <div style="font-size:9px;color:var(--text-3);margin-top:3px">%</div>
+              </th>
+            </tr>
+          </thead>
           <tbody id="pl-body"></tbody>
         </table>
       </div>
@@ -493,12 +500,6 @@ function init(){
     ];
   }
   renderTabla();renderFixedCosts();recalcDias();
-  // Auto-suggest income if zero
-  if(!num('ingreso_propuesto')){
-    calcular();
-    const costoTotal=(state.calc?.costoBase||0)+(state.calc?.costoFijoEvento||0);
-    if(costoTotal>0){document.getElementById('ingreso_propuesto').value=Math.round(costoTotal*1.35);save();}
-  }
   calcular();
 }
 
@@ -572,9 +573,9 @@ function renderTabla(){
       <td><select class="select" data-f="moneda">${MONEDAS.map(m=>`<option value="${m}" ${m===it.moneda?'selected':''}>${MONEDA_ITEM_LABELS[m]||m}</option>`).join('')}</select></td>
       <td><input class="input mono" type="number" step="0.01" data-f="costo" value="${costoVal}" placeholder="${costoDisabled?'—':'0'}" ${costoDisabled?'disabled style="opacity:.35"':''}></td>
       <td><input class="input mono" type="number" data-f="cant" value="${it.cant}" style="max-width:70px"></td>
-      <td><input class="input mono" type="number" data-f="dias" value="${it.dias}" style="max-width:70px"></td>
+      <td><input class="input mono" type="number" data-f="dias" value="${it.dias}" style="min-width:70px"></td>
       <td style="text-align:center"><label class="toggle"><input type="checkbox" data-f="propio" ${it.propio?'checked':''}><span class="toggle-slider"></span></label></td>
-      <td><input class="input mono" type="number" data-f="capex" value="${capexVal}" placeholder="${capexDisabled?'—':'0'}" ${capexDisabled?'disabled style="opacity:.35"':''}></td>
+      <td><input class="input mono" type="number" data-f="capex" value="${capexVal}" placeholder="${capexDisabled?'—':'0'}" style="min-width:100px" ${capexDisabled?'disabled style="opacity:.35;min-width:100px"':''}></td>
       <td><input class="input mono" type="number" data-f="vida" value="${it.vida}" style="max-width:70px" ${capexDisabled?'disabled style="opacity:.35"':''}></td>
       <td class="mono" data-r="total" style="font-weight:600;text-align:right">0</td>
       <td class="mono" data-r="costpar" style="font-weight:700;text-align:right;color:#FBBF24">$ 0</td>
@@ -685,57 +686,50 @@ function calcular(){
   const partidos=num('evento_partidos')||dias;
   const costoDia=costoVar/Math.max(dias,1);
 
-  // --- Income / Selling price ---
-  const ingreso=num('ingreso_propuesto');
+  // --- Income from Margin % (Break-even pricing) ---
+  // Income = CostoTotal / (1 - margen%/100)
+  // Then express in each currency: Income_moneda = Income_usdPar × TC_paralelo / TC_moneda
   const bcvUsd=num('tasa_bcv_usd');const bcvEur=num('tasa_bcv_eur');const par=num('tasa_paralelo');
+  const mgPctBcv=num('mg_pct_bcv');const mgPctEur=num('mg_pct_eur');const mgPctPar=num('mg_pct_par');
 
-  // 3 income scenarios: effective USD Centauro receives
-  // USD/BCV: client pays Bs at BCV USD rate, Centauro converts to USD at parallel → effective less
-  const ingBsUsdBcv=ingreso*bcvUsd;
-  const efectivoUsdBcv=par>0?ingBsUsdBcv/par:ingreso;
-  // EUR/BCV: client pays Bs at BCV EUR rate (quote EUR equiv), Centauro converts to USD at parallel
-  const ingresoEurEquiv=bcvEur>0?ingBsUsdBcv/bcvEur:0; // EUR amount that equals same Bs
-  const ingBsEurBcv=ingresoEurEquiv*bcvEur;
-  const efectivoEurBcv=par>0?ingBsEurBcv/par:ingreso;
-  // USD/Paralelo: client pays Bs at parallel rate → Centauro gets full USD
-  const ingBsParalelo=ingreso*par;
-  const efectivoParalelo=ingreso;
+  // Income in USD-Paralelo for each scenario
+  const ingParBcv=mgPctBcv<100?costoTotal/(1-mgPctBcv/100):0;
+  const ingParEur=mgPctEur<100?costoTotal/(1-mgPctEur/100):0;
+  const ingParPar=mgPctPar<100?costoTotal/(1-mgPctPar/100):0;
 
-  // Margins for each scenario
-  const margenBrutoBcv=efectivoUsdBcv-costoTotal;
-  const margenBrutoEur=efectivoEurBcv-costoTotal;
-  const margenBrutoParalelo=efectivoParalelo-costoTotal;
-  const margenPctBcv=efectivoUsdBcv>0?(margenBrutoBcv/efectivoUsdBcv)*100:0;
-  const margenPctEur=efectivoEurBcv>0?(margenBrutoEur/efectivoEurBcv)*100:0;
-  const margenPctParalelo=ingreso>0?(margenBrutoParalelo/ingreso)*100:0;
+  // Express in the client-facing currency
+  const ingUsdBcv=bcvUsd>0?ingParBcv*par/bcvUsd:ingParBcv; // USD at BCV rate
+  const ingEurBcv=bcvEur>0?ingParEur*par/bcvEur:ingParEur; // EUR at BCV rate
+  const ingUsdParalelo=ingParPar; // USD at parallel = same
 
-  // Net margin = gross - fixed (already included), so net = gross margin - 0 = gross margin (fijos ya están en costoTotal)
-  // Actually costoTotal already includes fijos, so margenBruto IS the net margin
-  const margenNeto=margenBrutoParalelo; // best scenario
+  // Margins in absolute
+  const margenBrutoBcv=ingParBcv-costoTotal;
+  const margenBrutoEur=ingParEur-costoTotal;
+  const margenBrutoParalelo=ingParPar-costoTotal;
 
-  // Daily prices
-  const precioDiaBcv=efectivoUsdBcv/Math.max(dias,1);
-  const precioDiaEur=efectivoEurBcv/Math.max(dias,1);
-  const precioDiaParalelo=efectivoParalelo/Math.max(dias,1);
+  // Daily prices (in client currency)
+  const precioDiaBcv=ingUsdBcv/Math.max(dias,1);
+  const precioDiaEur=ingEurBcv/Math.max(dias,1);
+  const precioDiaParalelo=ingUsdParalelo/Math.max(dias,1);
   // Per activation
-  const precioActBcv=efectivoUsdBcv/Math.max(partidos,1);
-  const precioActEur=efectivoEurBcv/Math.max(partidos,1);
-  const precioActParalelo=efectivoParalelo/Math.max(partidos,1);
+  const precioActBcv=ingUsdBcv/Math.max(partidos,1);
+  const precioActEur=ingEurBcv/Math.max(partidos,1);
+  const precioActParalelo=ingUsdParalelo/Math.max(partidos,1);
 
-  // IVA
+  // IVA: applies to USD-BCV and EUR-BCV, NOT to USD-Paralelo
   const ivaPct=chk('iva_aplica')?num('iva_pct'):0;
-  const ivaMonto=ingreso*(ivaPct/100);
-  const ingresoBrutoConIva=ingreso+ivaMonto;
-  const facturacionBs=ingresoBrutoConIva*bcvUsd;
+  const ingBrutoBcv=ingUsdBcv*(1+ivaPct/100);
+  const ingBrutoEur=ingEurBcv*(1+ivaPct/100);
+  const ingBrutoParalelo=ingUsdParalelo; // sin IVA
+  const facturacionBs=ingBrutoBcv*bcvUsd; // Bs oficial
 
-  // ROI
-  const roi=costoTotal>0?((ingreso-costoTotal)/costoTotal)*100:0;
-  // Breakeven
+  // ROI / Breakeven (using paralelo scenario)
+  const roi=costoTotal>0?((ingParPar-costoTotal)/costoTotal)*100:0;
   const margenPorDia=margenBrutoParalelo/Math.max(dias,1);
   const diasBreakeven=margenPorDia>0?Math.ceil(costoFijoEvento/margenPorDia):0;
   // Capital de trabajo
-  const anticipoCobro=ingresoBrutoConIva*(num('cobro_anticipo')/100);
-  const anticipoPago=costoTotal*0.50; // Fijo 50% según términos contractuales proveedor
+  const anticipoCobro=ingBrutoParalelo*(num('cobro_anticipo')/100);
+  const anticipoPago=costoTotal*0.50;
   const capitalTrabajo=Math.max(0,anticipoPago-anticipoCobro);
 
   // ---- Render sections ----
@@ -745,39 +739,35 @@ function calcular(){
 
   // Sticky footer (paralelo scenario)
   setVal('sf_costo','$ '+fN(costoTotal));
-  setVal('sf_venta','$ '+fN(ingreso));
+  setVal('sf_venta','$ '+fN(ingUsdParalelo));
   setVal('sf_margen','$ '+fN(margenBrutoParalelo));
-  setVal('sf_margenpct',fN(margenPctParalelo,1)+'%');
+  setVal('sf_margenpct',fN(mgPctPar,1)+'%');
   setVal('sf_bs','Bs '+fN(facturacionBs));
 
   // Dashboard
-  setVal('k_venta','$ '+fN(ingreso));
+  setVal('k_venta','$ '+fN(ingUsdParalelo));
   setVal('k_margen','$ '+fN(margenBrutoParalelo));
-  setVal('k_margen_pct',fN(margenPctParalelo,1)+'% sobre venta');
+  setVal('k_margen_pct',fN(mgPctPar,1)+'% margen bruto');
   setVal('k_costo','$ '+fN(costoTotal));
-  setVal('k_neto','$ '+fN(margenNeto));
-  setVal('k_neto_pct',fN(margenPctParalelo,1)+'% neto');
+  setVal('k_neto','$ '+fN(margenBrutoParalelo));
+  setVal('k_neto_pct',fN(mgPctPar,1)+'% neto');
   setVal('k_bs','Bs '+fN(facturacionBs));
   setVal('k_bep',diasBreakeven+' días');
   setVal('k_roi',fN(roi,1)+'%');
   setVal('k_cap','$ '+fN(capitalTrabajo));
 
-  state.calc={costoVar,costoFijoEvento,costoTotal,ingreso,efectivoUsdBcv,efectivoEurBcv,efectivoParalelo,
-    margenBrutoBcv,margenBrutoEur,margenBrutoParalelo,margenPctBcv,margenPctEur,margenPctParalelo,
+  state.calc={costoVar,costoFijoEvento,costoTotal,
+    ingUsdBcv,ingEurBcv,ingUsdParalelo,ingParBcv,ingParEur,ingParPar,
+    margenBrutoBcv,margenBrutoEur,margenBrutoParalelo,mgPctBcv,mgPctEur,mgPctPar,
     precioDiaBcv,precioDiaEur,precioDiaParalelo,precioActBcv,precioActEur,precioActParalelo,
-    ingresoBrutoConIva,ivaMonto,facturacionBs,porCat,costoFijoEvento:costoFijoEvento,
-    margenNeto,capitalTrabajo,anticipoCobro,anticipoPago,dias,partidos,ingBsUsdBcv,ingBsParalelo,ingresoEurEquiv};
+    ingBrutoBcv,ingBrutoEur,ingBrutoParalelo,facturacionBs,porCat,
+    capitalTrabajo,anticipoCobro,anticipoPago,dias,partidos};
 
   if(state.lastTab==='margen')renderPL();
   if(state.lastTab==='dashboard')renderDashboard();
   if(state.lastTab==='cashflow')renderCashflow();
   if(state.lastTab==='buyrent')renderBuyRent();
   if(state.lastTab==='bench')renderBenchmark();
-}
-
-function sugerirIngreso(mult){
-  const c=(state.calc?.costoTotal||0);
-  document.getElementById('ingreso_propuesto').value=Math.round(c*mult);save();calcular();
 }
 
 function renderCategorias(cats){
@@ -792,6 +782,7 @@ function renderPL(){
   if(!state.calc)return;
   const c=state.calc;const tb=document.getElementById('pl-body');tb.innerHTML='';
   const dias=c.dias;const partidos=c.partidos;const showAct=dias!==partidos;
+  const bcvUsd=num('tasa_bcv_usd');const bcvEur=num('tasa_bcv_eur');const par=num('tasa_paralelo');
 
   function addRow(label,v1,v2,v3,cls='',isHeader=false){
     const tr=document.createElement('tr');if(cls)tr.className=cls;
@@ -799,70 +790,60 @@ function renderPL(){
     }else{tr.innerHTML=`<td style="padding:12px 16px">${label}</td><td class="pl-val">${v1}</td><td class="pl-val">${v2}</td><td class="pl-val">${v3}</td>`;}
     tb.appendChild(tr);
   }
-  function addPctRow(label,p1,p2,p3,cls='pl-row-margin'){
-    const tr=document.createElement('tr');tr.className=cls;
-    const color=v=>v>=0?'color:#34D399':'color:#F87171';
-    tr.innerHTML=`<td style="padding:12px 16px;font-weight:700">${label}</td><td class="pl-pct" style="${color(p1)}">${fN(p1,1)}%</td><td class="pl-pct" style="${color(p2)}">${fN(p2,1)}%</td><td class="pl-pct" style="${color(p3)}">${fN(p3,1)}%</td>`;
-    tb.appendChild(tr);
-  }
 
-  // GASTOS FIJOS
-  addRow('GASTOS FIJOS (Imputados al proyecto)',null,null,null,'',true);
+  // ---- COSTOS (todos en USD-Paralelo, mismo valor en las 3 columnas) ----
+  addRow('GASTOS FIJOS (USD-Paralelo)',null,null,null,'',true);
   state.fixedCosts.forEach(fc=>{
     if(fc.pctImput===undefined) fc.pctImput=100;
     const imputado=fc.monto*(fc.pctImput/100);
     const costoProy=fixedToUSDParalelo(imputado,fc.moneda);
-    addRow(fc.concepto+` <span style="color:var(--text-3);font-size:11px">(${MONEDA_FIJO_LABELS[fc.moneda]} · ${fc.pctImput}%)</span>`,'$ '+fN(costoProy),'$ '+fN(costoProy),'$ '+fN(costoProy));
+    addRow(fc.concepto+` <span style="color:var(--text-3);font-size:11px">(${fc.pctImput}%)</span>`,'$ '+fN(costoProy),'$ '+fN(costoProy),'$ '+fN(costoProy));
   });
   addRow('<b>Subtotal Gastos Fijos</b>','$ '+fN(c.costoFijoEvento),'$ '+fN(c.costoFijoEvento),'$ '+fN(c.costoFijoEvento),'pl-row-total');
 
-  // COSTOS VARIABLES
-  addRow('COSTOS VARIABLES (Cotizador)',null,null,null,'',true);
+  addRow('COSTOS VARIABLES (USD-Paralelo)',null,null,null,'',true);
   Object.entries(c.porCat).forEach(([k,v])=>{if(v>0)addRow(k,'$ '+fN(v),'$ '+fN(v),'$ '+fN(v));});
   addRow('<b>Subtotal Costos Variables</b>','$ '+fN(c.costoVar),'$ '+fN(c.costoVar),'$ '+fN(c.costoVar),'pl-row-total');
 
-  // TOTAL COSTOS
-  addRow('<b>TOTAL COSTOS DEL PROYECTO</b>','$ '+fN(c.costoTotal),'$ '+fN(c.costoTotal),'$ '+fN(c.costoTotal),'pl-row-total');
+  addRow('<b>TOTAL COSTOS DEL PROYECTO (USD-Paralelo)</b>','$ '+fN(c.costoTotal),'$ '+fN(c.costoTotal),'$ '+fN(c.costoTotal),'pl-row-total');
 
-  // INGRESOS NETOS
+  // ---- INGRESOS NETOS (cada columna en su moneda) ----
   addRow('INGRESOS NETOS',null,null,null,'',true);
-  addRow('Ingresos Netos cobrados en <b>USD / Bs (BCV)</b>','$ '+fN(c.efectivoUsdBcv),'—','—','pl-row-income');
-  addRow('Ingresos Netos cobrados en <b>EUR / Bs (BCV)</b>','—','€ '+fN(c.ingresoEurEquiv)+' <span style="font-size:10px;color:var(--text-2)">= $ '+fN(c.efectivoEurBcv)+'</span>','—','pl-row-income');
-  addRow('Ingresos Netos cobrados en <b>USD / Paralelo</b>','—','—','$ '+fN(c.efectivoParalelo),'pl-row-income');
+  addRow('Ingresos Netos en <b>USD / BCV</b>','$ '+fN(c.ingUsdBcv),'—','—','pl-row-income');
+  addRow('Ingresos Netos en <b>EUR / BCV</b>','—','€ '+fN(c.ingEurBcv),'—','pl-row-income');
+  addRow('Ingresos Netos en <b>USD / Paralelo</b>','—','—','$ '+fN(c.ingUsdParalelo),'pl-row-income');
 
-  // MARGEN BRUTO %
-  addPctRow('MARGEN BRUTO DE GANANCIA (%)',c.margenPctBcv,c.margenPctEur,c.margenPctParalelo);
+  // MARGEN NETO (absoluto, en USD-Paralelo)
+  addRow('<b>MARGEN NETO (USD-Paralelo)</b>','$ '+fN(c.margenBrutoBcv),'$ '+fN(c.margenBrutoEur),'$ '+fN(c.margenBrutoParalelo),'pl-row-net');
 
-  // MARGEN NETO (absoluto)
-  addRow('<b>MARGEN NETO (valores absolutos)</b>','$ '+fN(c.margenBrutoBcv),'$ '+fN(c.margenBrutoEur),'$ '+fN(c.margenBrutoParalelo),'pl-row-net');
-
-  // PRECIO DIARIO
-  addRow('PRECIO DIARIO (Ingreso / '+dias+' días)',null,null,null,'',true);
-  addRow('Ingreso diario USD/Bs (BCV)','$ '+fN(c.precioDiaBcv),'—','—','pl-row-daily');
-  addRow('Ingreso diario EUR/Bs (BCV)','—','$ '+fN(c.precioDiaEur),'—','pl-row-daily');
-  addRow('Ingreso diario USD/Paralelo','—','—','$ '+fN(c.precioDiaParalelo),'pl-row-daily');
+  // ---- INGRESO DIARIO ----
+  addRow('INGRESO DIARIO (Ingreso / '+dias+' días)',null,null,null,'',true);
+  addRow('Ingreso diario <b>USD / BCV</b>','$ '+fN(c.precioDiaBcv),'—','—','pl-row-daily');
+  addRow('Ingreso diario <b>EUR / BCV</b>','—','€ '+fN(c.precioDiaEur),'—','pl-row-daily');
+  addRow('Ingreso diario <b>USD / Paralelo</b>','—','—','$ '+fN(c.precioDiaParalelo),'pl-row-daily');
 
   // PRECIO POR ACTIVACIÓN (solo si días ≠ partidos)
   if(showAct){
-    addRow('PRECIO POR ACTIVACIÓN (Ingreso / '+partidos+' activaciones)',null,null,null,'',true);
-    addRow('Ingreso por activación USD/Bs','$ '+fN(c.precioActBcv),'—','—','pl-row-daily');
-    addRow('Ingreso por activación EUR/Bs','—','$ '+fN(c.precioActEur),'—','pl-row-daily');
-    addRow('Ingreso por activación USD/Paralelo','—','—','$ '+fN(c.precioActParalelo),'pl-row-daily');
+    addRow('INGRESO POR ACTIVACIÓN (/ '+partidos+' activaciones)',null,null,null,'',true);
+    addRow('Por activación <b>USD / BCV</b>','$ '+fN(c.precioActBcv),'—','—','pl-row-daily');
+    addRow('Por activación <b>EUR / BCV</b>','—','€ '+fN(c.precioActEur),'—','pl-row-daily');
+    addRow('Por activación <b>USD / Paralelo</b>','—','—','$ '+fN(c.precioActParalelo),'pl-row-daily');
   }
 
-  // INGRESOS BRUTOS + IMPUESTOS
+  // ---- INGRESOS BRUTOS + IMPUESTOS ----
+  // IVA aplica a USD-BCV y EUR-BCV, NO aplica a USD-Paralelo
   addRow('INGRESOS BRUTOS + IMPUESTOS',null,null,null,'',true);
   const ivaPctVal=chk('iva_aplica')?num('iva_pct'):0;
-  const ivaLabel=ivaPctVal>0?`(IVA ${fN(ivaPctVal,0)}% incluido)`:'(Sin IVA)';
-  addRow(`Ingreso Bruto al Cliente ${ivaLabel}`,
-    '$ '+fN(c.efectivoUsdBcv*(1+ivaPctVal/100)),
-    '€ '+fN(c.ingresoEurEquiv*(1+ivaPctVal/100)),
-    '$ '+fN(c.efectivoParalelo*(1+ivaPctVal/100)),
-    'pl-row-bruto');
-  addRow('Facturación en Bs (BCV)',
-    'Bs '+fN(c.ingBsUsdBcv*(1+ivaPctVal/100)),
-    'Bs '+fN(c.ingresoEurEquiv*num('tasa_bcv_eur')*(1+ivaPctVal/100)),
-    'Bs '+fN(c.ingBsParalelo*(1+ivaPctVal/100)),
+  const ivaLbl=ivaPctVal>0?'IVA '+fN(ivaPctVal,0)+'%':'Sin IVA';
+  addRow(`Ingreso Bruto <b>USD / BCV</b> <span style="font-size:10px;color:var(--text-2)">(${ivaLbl})</span>`,'$ '+fN(c.ingBrutoBcv),'—','—','pl-row-bruto');
+  addRow(`Ingreso Bruto <b>EUR / BCV</b> <span style="font-size:10px;color:var(--text-2)">(${ivaLbl})</span>`,'—','€ '+fN(c.ingBrutoEur),'—','pl-row-bruto');
+  addRow('Ingreso Bruto <b>USD / Paralelo</b> <span style="font-size:10px;color:var(--text-2)">(Sin IVA)</span>','—','—','$ '+fN(c.ingBrutoParalelo),'pl-row-bruto');
+
+  // Facturación en Bs
+  addRow('Facturación en Bs',
+    'Bs '+fN(c.ingBrutoBcv*bcvUsd),
+    'Bs '+fN(c.ingBrutoEur*bcvEur),
+    'Bs '+fN(c.ingBrutoParalelo*par),
     '');
 }
 
@@ -900,7 +881,7 @@ function renderSensibilidad(){
   vars.forEach((vB,i)=>{h+=`<div class="sens-cell sens-axis">${lbl[i]}</div>`;
     vars.forEach(vP=>{
       const nB=baseBcv*(1+vB),nP=basePar*(1+vP);
-      const ing=num('ingreso_propuesto');const efect=nP>0?(ing*nB/nP):ing;
+      const mgP=num('mg_pct_par');const ingP=mgP<100?state.calc.costoTotal/(1-mgP/100):0;const efect=ingP;
       const margen=efect-state.calc.costoTotal;
       const baseM=state.calc.margenBrutoParalelo;
       const delta=baseM>0?((margen-baseM)/baseM)*100:0;
@@ -975,7 +956,7 @@ function renderBenchmark(){
 /* ============ PERSISTENCE ============ */
 function save(){
   const snap={items:state.items,fixedCosts:state.fixedCosts,lastTab:state.lastTab,fields:{}};
-  ['cli_razon','cli_rif','cli_contacto','cli_email','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','ingreso_propuesto'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
+  ['cli_razon','cli_rif','cli_contacto','cli_email','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','mg_pct_bcv','mg_pct_eur','mg_pct_par'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
   ['iva_aplica','islr_aplica'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.checked;});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(snap));}catch(e){}
 }
