@@ -301,15 +301,15 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
       </div>
       <div style="overflow-x:auto">
         <table class="table" id="tbl">
-          <thead><tr><th style="min-width:240px">Concepto</th><th>Categoría</th><th>Moneda</th><th>Costo Unit.</th><th>Cant.</th><th>Días</th><th>Propio</th><th title="CAPEX USD si es propio">CAPEX USD</th><th title="Vida útil en eventos">Vida·Ev</th><th>Total USD</th><th></th></tr></thead>
+          <thead><tr><th style="min-width:240px">Concepto</th><th>Categoría</th><th>Moneda</th><th>Cant.</th><th>Días</th><th>Propio</th><th title="CAPEX USD si es propio">CAPEX USD</th><th title="Vida útil en eventos">Vida·Ev</th><th>Total</th><th>Costo (USD-Paralelo)</th><th></th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
     </div>
     <div class="grid grid-3" style="margin-top:24px">
       <div class="card"><div class="section-title" style="margin-bottom:8px">Por Categoría</div><div id="cat-breakdown" style="display:flex;flex-direction:column;gap:10px"></div></div>
-      <div class="card card-hi"><div class="section-title" style="margin-bottom:8px">Costo Variable Total</div><div class="kpi-value txt-brand" id="q_costo_base">$ 0.00</div><div class="kpi-sub">Suma de rubros (estandarizado en USD)</div></div>
-      <div class="card"><div class="section-title" style="margin-bottom:8px">Costo por Día de Operación</div><div class="kpi-value mono" id="q_costo_dia">$ 0.00</div><div class="kpi-sub">Para vender activaciones puntuales</div></div>
+      <div class="card card-hi"><div class="section-title" style="margin-bottom:8px">Costo Variable Total (USD-Paralelo)</div><div class="kpi-value txt-brand" id="q_costo_base">$ 0.00</div><div class="kpi-sub">Suma columna Costo (USD-Paralelo)</div></div>
+      <div class="card"><div class="section-title" style="margin-bottom:8px">Costo por Día (USD-Paralelo)</div><div class="kpi-value mono" id="q_costo_dia">$ 0.00</div><div class="kpi-sub">Costo Variable Total / Días evento</div></div>
     </div>
   </section>
 
@@ -468,7 +468,8 @@ const BENCH={
 const MONEDA_FIJO=['USD_PARALELO','USD_BCV','EUR_BCV'];
 const MONEDA_FIJO_LABELS={'USD_PARALELO':'USD / Paralelo','USD_BCV':'USD / BCV','EUR_BCV':'EUR / BCV'};
 const CAT_OPTS=['Infraestructura','Logística','Agencia'];
-const MONEDAS=['USD','EUR'];
+const MONEDAS=['USD','EUR','USD_PARALELO'];
+const MONEDA_ITEM_LABELS={'USD':'USD (BCV)','EUR':'EUR (BCV)','USD_PARALELO':'USD (Paralelo)'};
 const STORAGE_KEY='centauro_cotizador_v2';
 
 let state={items:[],fixedCosts:[],lastTab:'config'};
@@ -562,14 +563,14 @@ function renderTabla(){
     tr.innerHTML=`
       <td><input class="input" data-f="nombre" value="${esc(it.nombre)}"></td>
       <td><select class="select" data-f="cat">${CAT_OPTS.map(c=>`<option ${c===it.cat?'selected':''}>${c}</option>`).join('')}</select></td>
-      <td><select class="select" data-f="moneda">${MONEDAS.map(m=>`<option ${m===it.moneda?'selected':''}>${m}</option>`).join('')}</select></td>
-      <td><input class="input mono" type="number" step="0.01" data-f="costo" value="${it.costo}"></td>
+      <td><select class="select" data-f="moneda">${MONEDAS.map(m=>`<option value="${m}" ${m===it.moneda?'selected':''}>${MONEDA_ITEM_LABELS[m]||m}</option>`).join('')}</select></td>
       <td><input class="input mono" type="number" data-f="cant" value="${it.cant}" style="max-width:70px"></td>
       <td><input class="input mono" type="number" data-f="dias" value="${it.dias}" style="max-width:70px"></td>
       <td style="text-align:center"><label class="toggle"><input type="checkbox" data-f="propio" ${it.propio?'checked':''}><span class="toggle-slider"></span></label></td>
       <td><input class="input mono" type="number" data-f="capex" value="${it.capex}" placeholder="0" ${it.propio?'':'disabled style="opacity:.4"'}></td>
       <td><input class="input mono" type="number" data-f="vida" value="${it.vida}" style="max-width:70px" ${it.propio?'':'disabled style="opacity:.4"'}></td>
-      <td class="mono" data-r="total" style="font-weight:700;text-align:right">$ 0</td>
+      <td class="mono" data-r="total" style="font-weight:600;text-align:right">0</td>
+      <td class="mono" data-r="costpar" style="font-weight:700;text-align:right;color:#FBBF24">$ 0</td>
       <td><button class="btn btn-danger btn-icon" onclick="eliminarFila('${it.id}')">✕</button></td>`;
     tr.querySelectorAll('[data-f]').forEach(inp=>{
       inp.addEventListener('input',()=>updateItem(it.id,inp));
@@ -587,7 +588,7 @@ function updateItem(id,inp){
   else it[f]=inp.value;
   save();calcular();
 }
-function agregarFila(){state.items.push({id:crypto.randomUUID(),nombre:'Nuevo rubro',cat:'Infraestructura',moneda:'USD',costo:0,cant:1,dias:1,propio:false,capex:0,vida:60});renderTabla();save();calcular();}
+function agregarFila(){state.items.push({id:crypto.randomUUID(),nombre:'Nuevo rubro',cat:'Infraestructura',moneda:'USD_PARALELO',costo:0,cant:1,dias:1,propio:false,capex:0,vida:60});renderTabla();save();calcular();}
 function eliminarFila(id){state.items=state.items.filter(x=>x.id!==id);renderTabla();save();calcular();}
 function duplicarSeleccion(){if(!state.items.length)return;state.items.push({...state.items[state.items.length-1],id:crypto.randomUUID()});renderTabla();save();calcular();}
 function limpiarTabla(){if(!confirm('¿Vaciar?'))return;state.items=[];renderTabla();save();calcular();}
@@ -604,9 +605,19 @@ function closeCatalog(){document.getElementById('modal-catalog').classList.remov
 /* ============ CURRENCY ============ */
 function toUSD(a,m){
   if(m==='USD')return a;
+  if(m==='USD_PARALELO')return a;
   if(m==='EUR'){const bcvU=num('tasa_bcv_usd'),bcvE=num('tasa_bcv_eur'),par=num('tasa_paralelo'),modo=document.getElementById('conv_eur').value;if(modo==='cross_bcv')return a*bcvE/bcvU;if(modo==='mercado')return a*1.08;return a*bcvE/par;}
   return a;
 }
+function itemToUSDParalelo(total,moneda){
+  const bcvUsd=num('tasa_bcv_usd');const bcvEur=num('tasa_bcv_eur');const par=num('tasa_paralelo');
+  if(par<=0) return total;
+  if(moneda==='USD') return total*bcvUsd/par;
+  if(moneda==='EUR') return total*bcvEur/par;
+  if(moneda==='USD_PARALELO') return total;
+  return total;
+}
+function monedaSymbol(m){return m==='EUR'?'€':'$';}
 function num(id){return parseFloat(document.getElementById(id).value)||0;}
 function chk(id){return document.getElementById(id).checked;}
 
@@ -635,11 +646,20 @@ function calcular(){
   // --- Variable costs ---
   let costoVar=0;let porCat={Infraestructura:0,Logística:0,Agencia:0};
   state.items.forEach(it=>{
-    let usd;
-    if(it.propio&&it.capex>0&&it.vida>0){const am=it.capex/it.vida;const mt=(it.capex*(num('br_mant_pct')/100))/(num('br_eventos_anio')||1);usd=am+mt;}
-    else{usd=toUSD((it.costo||0)*(it.cant||0)*(it.dias||0),it.moneda);}
-    const f=document.querySelector(`tr[data-id="${it.id}"] [data-r="total"]`);if(f)f.textContent='$ '+fN(usd);
-    costoVar+=usd;porCat[it.cat]=(porCat[it.cat]||0)+usd;
+    let totalOrig, costoParalelo;
+    if(it.propio&&it.capex>0&&it.vida>0){
+      const am=it.capex/it.vida;const mt=(it.capex*(num('br_mant_pct')/100))/(num('br_eventos_anio')||1);
+      totalOrig=am+mt; costoParalelo=totalOrig; // CAPEX ya en USD
+    } else {
+      totalOrig=(it.costo||0)*(it.cant||0)*(it.dias||0); // total en moneda original
+      costoParalelo=itemToUSDParalelo(totalOrig,it.moneda);
+    }
+    const row=document.querySelector(`tr[data-id="${it.id}"]`);
+    if(row){
+      const fTotal=row.querySelector('[data-r="total"]');if(fTotal)fTotal.textContent=monedaSymbol(it.moneda)+' '+fN(totalOrig);
+      const fPar=row.querySelector('[data-r="costpar"]');if(fPar)fPar.textContent='$ '+fN(costoParalelo);
+    }
+    costoVar+=costoParalelo;porCat[it.cat]=(porCat[it.cat]||0)+costoParalelo;
   });
 
   const costoTotal=costoFijoEvento+costoVar;
@@ -884,7 +904,7 @@ function renderBuyRent(){
   items.forEach(it=>{
     const cap=it.capex||0,vida=it.vida||num('br_vida_default');
     const am=cap/vida,mt=(cap*mantPct)/Math.max(evA,1),propio=am+mt;
-    const alquiler=toUSD((it.costo||0)*(it.cant||1)*(it.dias||dias),it.moneda);
+    const alquiler=itemToUSDParalelo((it.costo||0)*(it.cant||1)*(it.dias||dias),it.moneda);
     const ahorro=alquiler-propio;const be=ahorro>0?Math.ceil(cap/ahorro):999;const beM=be*(12/Math.max(evA,1));
     const vr=cap*resPct;const a12=ahorro*evA,a24=ahorro*evA*2;
     const r12=cap>0?((a12+vr*0.5-cap)/cap)*100:0,r24=cap>0?((a24+vr-cap)/cap)*100:0;
@@ -925,7 +945,7 @@ function renderBenchmark(){
     const cont=document.getElementById('bench-'+tipo);if(!cont)return;cont.innerHTML='';
     const regex=tipo==='sonido'?/sonido|line array|jbl|allegro|wharfedale/i:/led|pantalla/i;
     const its=state.items.filter(x=>regex.test(x.nombre));
-    const tuyo=its.reduce((a,it)=>a+(it.propio?(it.capex/it.vida):toUSD((it.costo||0)*(it.cant||1)*(it.dias||1),it.moneda)),0);
+    const tuyo=its.reduce((a,it)=>a+(it.propio?(it.capex/it.vida):itemToUSDParalelo((it.costo||0)*(it.cant||1)*(it.dias||1),it.moneda)),0);
     cont.innerHTML+=`<div class="bench-row you"><div><div class="bench-name">Tu Cotización</div><div class="bench-tag">Centauro ADS</div></div><div class="bench-val">USD</div><div class="bench-val">$${fN(tuyo)}</div><div class="bench-val">—</div><div class="bench-val">BASE</div></div>`;
     BENCH[tipo].forEach(b=>{
       const ref=b.moneda==='EUR'?toUSD(b.total,'EUR'):b.total;const delta=tuyo-ref;const pct=ref>0?(delta/ref)*100:0;const cls=delta<=0?'delta-pos':'delta-neg';
