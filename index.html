@@ -316,7 +316,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
   <!-- ============ PANEL: MARGEN / P&L ============ -->
   <section class="panel" id="panel-margen">
     <div class="section-title">Estado de Resultados (P&L) del Proyecto</div>
-    <div class="section-subtitle">Los costos se muestran en <b>USD-Paralelo</b>. Cada columna es un escenario de <b>Margen Bruto %</b>. Fórmula: Ingreso USD-Par = Costo / Margen%. Luego se convierte a cada moneda de cobro.</div>
+    <div class="section-subtitle">Los costos se muestran en <b>USD-Paralelo</b>. Cada columna es un escenario de <b>Margen Bruto %</b>. Fórmula: Ingreso = Costo / (1 − MB%). Luego se convierte a cada moneda de cobro.</div>
 
     <div class="table-wrap" style="margin-bottom:24px">
       <div style="overflow-x:auto">
@@ -693,7 +693,7 @@ function calcular(){
 
   // Para cada columna de margen: calcular 3 monedas
   const cols=mgPcts.map(mg=>{
-    const ingPar=mg>0?costoTotal/(mg/100):0;
+    const ingPar=mg<100?costoTotal/(1-mg/100):0;
     const ingBcv=bcvUsd>0?ingPar*par/bcvUsd:ingPar;
     const ingEur=bcvEur>0?ingPar*par/bcvEur:ingPar;
     const margenNeto=ingPar-costoTotal;
@@ -848,7 +848,7 @@ function renderSensibilidad(){
   vars.forEach((vB,i)=>{h+=`<div class="sens-cell sens-axis">${lbl[i]}</div>`;
     vars.forEach(vP=>{
       const nB=baseBcv*(1+vB),nP=basePar*(1+vP);
-      const mgP=num('mg_pct_1');const ingP=mgP>0?state.calc.costoTotal/(mgP/100):0;const efect=ingP;
+      const mgP=num('mg_pct_1');const ingP=mgP<100?state.calc.costoTotal/(1-mgP/100):0;const efect=ingP;
       const margen=efect-state.calc.costoTotal;
       const baseM=state.calc.margenBrutoParalelo;
       const delta=baseM>0?((margen-baseM)/baseM)*100:0;
