@@ -263,22 +263,22 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
         <div class="field"><label class="field-label">% Retención ISLR</label><input class="input" type="number" id="islr_pct" value="2" step="0.5" onchange="save();calcular()"></div>
       </div>
       <div class="card"><div class="field"><label class="field-label">% Anticipo Cliente</label><input class="input" type="number" id="cobro_anticipo" value="50" onchange="save();calcular()"><span class="field-hint">Resto al cierre del evento</span></div></div>
-      <div class="card"><div class="field"><label class="field-label">% Anticipo a Proveedor</label><input class="input" type="number" id="pago_anticipo" value="50" onchange="save();calcular()"><span class="field-hint">50% al montaje + 50% al 26/06</span></div></div>
+      <!-- Anticipo proveedor fijo al 50% según términos contractuales -->
     </div>
 
     <!-- COSTOS FIJOS — ahora como tabla dinámica con moneda -->
     <div class="section-title">Costos Fijos Mensuales</div>
-    <div class="section-subtitle">Costos que Centauro asume independientemente del evento. Se prorratean al proyecto según la duración en meses. La moneda define cómo se convierten a USD referencial para el P&L.</div>
+    <div class="section-subtitle">Costos que Centauro asume independientemente del evento. El <b>% Imputación</b> define qué proporción del gasto mensual se carga al proyecto. El <b>Costo Proyecto (USD-Paralelo)</b> convierte el imputado a USD usando la tasa de la moneda seleccionada y dividiendo entre la tasa USD Paralelo.</div>
     <div class="table-wrap" style="margin-bottom:8px">
       <div class="table-toolbar">
         <div class="table-toolbar-left"><button class="btn btn-primary btn-sm" onclick="addFixedCost()">+ Agregar Concepto</button></div>
-        <div style="font-size:12px;color:var(--text-2)">Imputación: Mensual × <span id="fix_meses_label">1.2</span> meses del evento = costo fijo del proyecto</div>
+        <div style="font-size:12px;color:var(--text-2)">Imputado = Monto × % Imputación · Costo Proyecto = Imputado convertido a USD Paralelo</div>
       </div>
       <div style="overflow-x:auto">
         <table class="table" id="tbl-fixed">
-          <thead><tr><th style="min-width:240px">Concepto</th><th>Monto Mensual</th><th>Moneda</th><th>Equiv. USD/mes</th><th>Imputado Proyecto</th><th></th></tr></thead>
+          <thead><tr><th style="min-width:200px">Concepto</th><th>Monto Mensual</th><th>Moneda</th><th>% Imputación</th><th>Imputado Proyecto</th><th>Costo Proyecto (USD-Paralelo)</th><th></th></tr></thead>
           <tbody id="tbody-fixed"></tbody>
-          <tfoot><tr style="background:var(--bg-2)"><td colspan="3" style="padding:12px 14px;font-weight:700;text-align:right">TOTAL MENSUAL USD</td><td class="mono" style="padding:12px 14px;font-weight:800;text-align:right" id="fix_total_mes">$ 0</td><td class="mono" style="padding:12px 14px;font-weight:800;text-align:right" id="fix_total_proy">$ 0</td><td></td></tr></tfoot>
+          <tfoot><tr style="background:var(--bg-2)"><td colspan="4" style="padding:12px 14px;font-weight:700;text-align:right">TOTALES</td><td class="mono" style="padding:12px 14px;font-weight:800;text-align:right" id="fix_total_imputado">$ 0</td><td class="mono" style="padding:12px 14px;font-weight:800;text-align:right;color:#FBBF24" id="fix_total_proy">$ 0</td><td></td></tr></tfoot>
         </table>
       </div>
     </div>
@@ -513,13 +513,15 @@ function switchTab(n){
 function renderFixedCosts(){
   const tb=document.getElementById('tbody-fixed');tb.innerHTML='';
   state.fixedCosts.forEach(fc=>{
+    if(fc.pctImput===undefined) fc.pctImput=100;
     const tr=document.createElement('tr');tr.dataset.id=fc.id;
     tr.innerHTML=`
       <td><input class="input" value="${esc(fc.concepto)}" data-ff="concepto"></td>
-      <td><input class="input mono" type="number" step="0.01" value="${fc.monto}" data-ff="monto" style="max-width:130px"></td>
+      <td><input class="input mono" type="number" step="0.01" value="${fc.monto}" data-ff="monto" style="max-width:120px"></td>
       <td><select class="select" data-ff="moneda">${MONEDA_FIJO.map(m=>`<option value="${m}" ${m===fc.moneda?'selected':''}>${MONEDA_FIJO_LABELS[m]}</option>`).join('')}</select></td>
-      <td class="mono" data-fr="equiv" style="text-align:right">$ 0</td>
-      <td class="mono" data-fr="imputado" style="text-align:right;font-weight:700">$ 0</td>
+      <td><input class="input mono" type="number" step="1" value="${fc.pctImput}" data-ff="pctImput" style="max-width:80px"></td>
+      <td class="mono" data-fr="imputado" style="text-align:right;font-weight:600">$ 0</td>
+      <td class="mono" data-fr="costoproy" style="text-align:right;font-weight:700;color:#FBBF24">$ 0</td>
       <td><button class="btn btn-danger btn-icon" onclick="removeFixedCost('${fc.id}')">✕</button></td>`;
     tr.querySelectorAll('[data-ff]').forEach(inp=>{
       inp.addEventListener('input',()=>updateFixed(fc.id,inp));
@@ -542,14 +544,14 @@ function removeFixedCost(id){
   state.fixedCosts=state.fixedCosts.filter(x=>x.id!==id);
   renderFixedCosts();save();calcular();
 }
-function fixedToUSD(monto,moneda){
-  if(moneda==='USD_PARALELO') return monto;
-  if(moneda==='USD_BCV') return monto; // already USD
-  if(moneda==='EUR_BCV'){
-    const bcvEur=num('tasa_bcv_eur');const par=num('tasa_paralelo');
-    return monto*bcvEur/par; // EUR→Bs(BCV)→USD(paralelo)
-  }
-  return monto;
+function fixedToUSDParalelo(imputado,moneda){
+  // Costo Proyecto (USD-Paralelo) = Imputado × TC_moneda / TC_paralelo
+  const bcvUsd=num('tasa_bcv_usd');const bcvEur=num('tasa_bcv_eur');const par=num('tasa_paralelo');
+  if(par<=0) return imputado;
+  if(moneda==='USD_PARALELO') return imputado*par/par; // = imputado (ya es USD paralelo)
+  if(moneda==='USD_BCV') return imputado*bcvUsd/par; // USD→Bs(BCV)→USD(paralelo)
+  if(moneda==='EUR_BCV') return imputado*bcvEur/par; // EUR→Bs(BCV)→USD(paralelo)
+  return imputado;
 }
 
 /* ============ VARIABLE COSTS TABLE ============ */
@@ -611,21 +613,23 @@ function chk(id){return document.getElementById(id).checked;}
 /* ============ MAIN CALC ============ */
 function calcular(){
   // --- Fixed costs ---
-  const inicio=new Date(document.getElementById('ev_inicio').value);
-  const fin=new Date(document.getElementById('ev_fin').value);
-  const mesesEvento=Math.max(0.5,(fin-inicio)/(1000*60*60*24*30.4));
-  document.getElementById('fix_meses_label').textContent=fN(mesesEvento,1);
-
-  let fixMensualUSD=0;
+  // Imputado = Monto × (% Imputación / 100)
+  // Costo Proyecto USD-Paralelo = Imputado × TC_moneda / TC_paralelo
+  let totalImputado=0;
+  let costoFijoEvento=0;
   state.fixedCosts.forEach(fc=>{
-    const usdMes=fixedToUSD(fc.monto,fc.moneda);
-    const imputado=usdMes*mesesEvento;
-    fixMensualUSD+=usdMes;
+    if(fc.pctImput===undefined) fc.pctImput=100;
+    const imputado=fc.monto*(fc.pctImput/100);
+    const costoProy=fixedToUSDParalelo(imputado,fc.moneda);
+    totalImputado+=imputado;
+    costoFijoEvento+=costoProy;
     const row=document.querySelector(`tr[data-id="${fc.id}"]`);
-    if(row){row.querySelector('[data-fr="equiv"]').textContent='$ '+fN(usdMes);row.querySelector('[data-fr="imputado"]').textContent='$ '+fN(imputado);}
+    if(row){
+      const rimp=row.querySelector('[data-fr="imputado"]');if(rimp)rimp.textContent='$ '+fN(imputado);
+      const rcost=row.querySelector('[data-fr="costoproy"]');if(rcost)rcost.textContent='$ '+fN(costoProy);
+    }
   });
-  const costoFijoEvento=fixMensualUSD*mesesEvento;
-  setVal('fix_total_mes','$ '+fN(fixMensualUSD));
+  setVal('fix_total_imputado','$ '+fN(totalImputado));
   setVal('fix_total_proy','$ '+fN(costoFijoEvento));
 
   // --- Variable costs ---
@@ -690,10 +694,10 @@ function calcular(){
   const roi=costoTotal>0?((ingreso-costoTotal)/costoTotal)*100:0;
   // Breakeven
   const margenPorDia=margenBrutoParalelo/Math.max(dias,1);
-  const diasBreakeven=margenPorDia>0?Math.ceil(fixMensualUSD/margenPorDia):0;
+  const diasBreakeven=margenPorDia>0?Math.ceil(costoFijoEvento/margenPorDia):0;
   // Capital de trabajo
   const anticipoCobro=ingresoBrutoConIva*(num('cobro_anticipo')/100);
-  const anticipoPago=costoTotal*(num('pago_anticipo')/100);
+  const anticipoPago=costoTotal*0.50; // Fijo 50% según términos contractuales proveedor
   const capitalTrabajo=Math.max(0,anticipoPago-anticipoCobro);
 
   // ---- Render sections ----
@@ -723,7 +727,7 @@ function calcular(){
   state.calc={costoVar,costoFijoEvento,costoTotal,ingreso,efectivoUsdBcv,efectivoEurBcv,efectivoParalelo,
     margenBrutoBcv,margenBrutoEur,margenBrutoParalelo,margenPctBcv,margenPctEur,margenPctParalelo,
     precioDiaBcv,precioDiaEur,precioDiaParalelo,precioActBcv,precioActEur,precioActParalelo,
-    ingresoBrutoConIva,ivaMonto,facturacionBs,porCat,fixMensualUSD,mesesEvento,
+    ingresoBrutoConIva,ivaMonto,facturacionBs,porCat,costoFijoEvento:costoFijoEvento,
     margenNeto,capitalTrabajo,anticipoCobro,anticipoPago,dias,partidos,ingBsUsdBcv,ingBsParalelo,ingresoEurEquiv};
 
   if(state.lastTab==='margen')renderPL();
@@ -765,10 +769,12 @@ function renderPL(){
   }
 
   // GASTOS FIJOS
-  addRow('GASTOS FIJOS MENSUALES (Prorrateados al proyecto)',null,null,null,'',true);
+  addRow('GASTOS FIJOS (Imputados al proyecto)',null,null,null,'',true);
   state.fixedCosts.forEach(fc=>{
-    const usd=fixedToUSD(fc.monto,fc.moneda)*c.mesesEvento;
-    addRow(fc.concepto+` <span style="color:var(--text-3);font-size:11px">(${MONEDA_FIJO_LABELS[fc.moneda]})</span>`,'$ '+fN(usd),'$ '+fN(usd),'$ '+fN(usd));
+    if(fc.pctImput===undefined) fc.pctImput=100;
+    const imputado=fc.monto*(fc.pctImput/100);
+    const costoProy=fixedToUSDParalelo(imputado,fc.moneda);
+    addRow(fc.concepto+` <span style="color:var(--text-3);font-size:11px">(${MONEDA_FIJO_LABELS[fc.moneda]} · ${fc.pctImput}%)</span>`,'$ '+fN(costoProy),'$ '+fN(costoProy),'$ '+fN(costoProy));
   });
   addRow('<b>Subtotal Gastos Fijos</b>','$ '+fN(c.costoFijoEvento),'$ '+fN(c.costoFijoEvento),'$ '+fN(c.costoFijoEvento),'pl-row-total');
 
@@ -899,7 +905,7 @@ function renderBuyRent(){
 function renderCashflow(){
   if(!state.calc)return;const c=state.calc;
   const ini=new Date(document.getElementById('ev_inicio').value),fin=new Date(document.getElementById('ev_fin').value);
-  const acP=num('cobro_anticipo')/100,apP=num('pago_anticipo')/100;
+  const acP=num('cobro_anticipo')/100,apP=0.50; // Anticipo proveedor fijo 50% según términos
   const fP1=new Date(ini);fP1.setDate(fP1.getDate()-3);const fP2=new Date('2026-06-26');
   const fC1=new Date(ini);fC1.setDate(fC1.getDate()-7);const fC2=new Date(fin);fC2.setDate(fC2.getDate()+7);
   const cobros=[{f:fC1,d:`Anticipo ${acP*100}%`,m:c.ingresoBrutoConIva*acP,t:'in'},{f:fC2,d:`Saldo ${(1-acP)*100}%`,m:c.ingresoBrutoConIva*(1-acP),t:'in'}];
@@ -931,7 +937,7 @@ function renderBenchmark(){
 /* ============ PERSISTENCE ============ */
 function save(){
   const snap={items:state.items,fixedCosts:state.fixedCosts,lastTab:state.lastTab,fields:{}};
-  ['cli_razon','cli_rif','cli_contacto','cli_email','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','pago_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','ingreso_propuesto'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
+  ['cli_razon','cli_rif','cli_contacto','cli_email','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','ingreso_propuesto'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
   ['iva_aplica','islr_aplica'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.checked;});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(snap));}catch(e){}
 }
