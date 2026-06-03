@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Centauro ADS · Asesor Estratégico Rental & Eventos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand-purple:#8B3FB7;
+  --brand-purple-light:#B57AE0;
+  --brand-purple-deep:#5E2880;
+  --brand-orange:#F59E0B;
+  --brand-orange-light:#FFB84D;
+  --bg-0:#0B0716;
+  --bg-1:#13091F;
+  --bg-2:#1B1130;
+  --bg-3:#241540;
+  --surface:rgba(255,255,255,0.04);
+  --surface-hi:rgba(255,255,255,0.07);
+  --border:rgba(181,122,224,0.15);
+  --border-hi:rgba(181,122,224,0.35);
+  --text-0:#F5F0FA;
+  --text-1:#C9BDD9;
+  --text-2:#8A7FA0;
+  --text-3:#5C5470;
+  --success:#10B981;
+  --success-bg:rgba(16,185,129,0.12);
+  --danger:#EF4444;
+  --danger-bg:rgba(239,68,68,0.12);
+  --warning:#F59E0B;
+  --info:#60A5FA;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg-0);color:var(--text-0);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:'cv11','ss01','ss03';font-variant-numeric:tabular-nums}
+body{min-height:100vh;background:
+  radial-gradient(ellipse 80% 50% at 20% 0%,rgba(139,63,183,0.18) 0%,transparent 50%),
+  radial-gradient(ellipse 60% 40% at 90% 10%,rgba(245,158,11,0.10) 0%,transparent 50%),
+  var(--bg-0)}
+button,input,select,textarea{font-family:inherit;color:inherit;font-feature-settings:inherit}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:'tnum'}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ============ LAYOUT ============ */
+.app{max-width:1440px;margin:0 auto;padding:24px 32px 120px}
+
+/* ============ HEADER ============ */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 0 28px;border-bottom:1px solid var(--border);margin-bottom:28px}
+.hdr-brand{display:flex;align-items:center;gap:16px}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--brand-purple) 0%,var(--brand-orange) 100%);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:#fff;box-shadow:0 8px 24px rgba(139,63,183,0.4)}
+.hdr-title{font-weight:800;font-size:20px;letter-spacing:-0.02em}
+.hdr-subtitle{color:var(--text-2);font-size:12px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;margin-top:2px}
+.hdr-meta{display:flex;gap:24px;align-items:center}
+.hdr-pill{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--text-1);display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(16,185,129,0.2)}
+
+/* ============ TABS ============ */
+.tabs{display:flex;gap:4px;padding:4px;background:var(--bg-1);border:1px solid var(--border);border-radius:14px;margin-bottom:28px;overflow-x:auto}
+.tab{flex:1;min-width:fit-content;padding:12px 18px;background:transparent;border:none;color:var(--text-2);font-weight:600;font-size:13px;cursor:pointer;border-radius:10px;transition:all .25s ease;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.tab:hover{color:var(--text-0);background:var(--surface)}
+.tab.active{color:#fff;background:linear-gradient(135deg,var(--brand-purple) 0%,var(--brand-purple-deep) 100%);box-shadow:0 6px 20px rgba(139,63,183,0.35)}
+.tab-icon{font-size:14px;opacity:.85}
+
+/* ============ PANELS ============ */
+.panel{display:none}
+.panel.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-title{font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-2);margin:8px 0 16px;display:flex;align-items:center;gap:10px}
+.section-title::before{content:'';width:24px;height:2px;background:linear-gradient(90deg,var(--brand-purple),var(--brand-orange));border-radius:2px}
+.section-subtitle{color:var(--text-2);font-size:13px;font-weight:400;margin-bottom:20px;line-height:1.6}
+
+/* ============ CARDS / GRIDS ============ */
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.grid-4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.grid-5{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.card{background:var(--bg-1);border:1px solid var(--border);border-radius:16px;padding:20px;transition:border-color .2s}
+.card:hover{border-color:var(--border-hi)}
+.card-hi{background:linear-gradient(160deg,rgba(139,63,183,0.10) 0%,rgba(245,158,11,0.04) 100%);border-color:var(--border-hi)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-2)}
+.field-hint{font-size:11px;color:var(--text-3);margin-top:2px}
+.input,.select,.textarea{background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text-0);font-size:13px;font-weight:500;transition:all .2s;outline:none;width:100%}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--brand-purple);box-shadow:0 0 0 3px rgba(139,63,183,0.18);background:var(--bg-3)}
+.input[type=number]{font-family:'JetBrains Mono',monospace}
+.select{appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A7FA0' stroke-width='2.5'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.textarea{min-height:72px;resize:vertical;font-family:inherit}
+
+/* ============ KPI CARDS ============ */
+.kpi{background:var(--bg-1);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-2)}
+.kpi-value{font-size:28px;font-weight:800;letter-spacing:-0.02em;margin-top:8px;line-height:1.1}
+.kpi-sub{font-size:12px;color:var(--text-2);margin-top:6px;display:flex;align-items:center;gap:6px}
+.kpi-trend{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+.kpi-trend.up{color:var(--success);background:var(--success-bg)}
+.kpi-trend.down{color:var(--danger);background:var(--danger-bg)}
+.kpi.success{border-color:rgba(16,185,129,0.3);background:linear-gradient(160deg,rgba(16,185,129,0.08) 0%,var(--bg-1) 100%)}
+.kpi.success .kpi-value{color:#34D399}
+.kpi.warning{border-color:rgba(245,158,11,0.3);background:linear-gradient(160deg,rgba(245,158,11,0.08) 0%,var(--bg-1) 100%)}
+.kpi.warning .kpi-value{color:#FBBF24}
+.kpi.danger{border-color:rgba(239,68,68,0.3);background:linear-gradient(160deg,rgba(239,68,68,0.08) 0%,var(--bg-1) 100%)}
+.kpi.danger .kpi-value{color:#F87171}
+.kpi.brand{border-color:var(--border-hi);background:linear-gradient(160deg,rgba(139,63,183,0.18) 0%,rgba(245,158,11,0.06) 100%)}
+.kpi.brand .kpi-value{background:linear-gradient(90deg,var(--brand-purple-light),var(--brand-orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ============ TABLE ============ */
+.table-wrap{background:var(--bg-1);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.table-toolbar-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table thead th{background:var(--bg-2);text-align:left;padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-2);border-bottom:1px solid var(--border);white-space:nowrap}
+.table tbody td{padding:8px 10px;border-bottom:1px solid rgba(181,122,224,0.06);vertical-align:middle}
+.table tbody tr:hover{background:var(--surface)}
+.table .input,.table .select{background:transparent;border:1px solid transparent;padding:7px 8px;font-size:13px;border-radius:6px}
+.table .input:hover,.table .select:hover{border-color:var(--border);background:var(--bg-2)}
+.table .input:focus,.table .select:focus{border-color:var(--brand-purple);background:var(--bg-3)}
+.cat-pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase}
+.cat-infra{background:rgba(96,165,250,0.15);color:#93C5FD}
+.cat-logi{background:rgba(245,158,11,0.15);color:#FBBF24}
+.cat-agen{background:rgba(139,63,183,0.18);color:#C4A0E8}
+
+/* ============ BUTTONS ============ */
+.btn{padding:10px 16px;border:none;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--brand-purple),var(--brand-purple-deep));color:#fff;box-shadow:0 6px 20px rgba(139,63,183,0.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(139,63,183,0.4)}
+.btn-accent{background:linear-gradient(135deg,var(--brand-orange),#D97706);color:#fff;box-shadow:0 6px 20px rgba(245,158,11,0.25)}
+.btn-accent:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(245,158,11,0.4)}
+.btn-ghost{background:var(--surface);color:var(--text-1);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface-hi);color:var(--text-0)}
+.btn-danger{background:var(--danger-bg);color:#F87171;border:1px solid rgba(239,68,68,0.3)}
+.btn-danger:hover{background:rgba(239,68,68,0.2)}
+.btn-icon{padding:6px 8px;font-size:14px;line-height:1}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* ============ STICKY FOOTER ============ */
+.sticky-footer{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(11,7,22,0.85);backdrop-filter:blur(20px);border:1px solid var(--border-hi);border-radius:18px;padding:14px 22px;display:flex;gap:28px;align-items:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:50;max-width:calc(100vw - 40px);overflow-x:auto}
+.sf-item{display:flex;flex-direction:column;gap:2px;white-space:nowrap}
+.sf-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-2);font-weight:600}
+.sf-value{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:-0.01em}
+.sf-value.brand{background:linear-gradient(90deg,var(--brand-purple-light),var(--brand-orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sf-divider{width:1px;height:32px;background:var(--border)}
+
+/* ============ CHECKBOX/TOGGLE ============ */
+.toggle{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--bg-3);border:1px solid var(--border);border-radius:999px;transition:.25s}
+.toggle-slider:before{content:'';position:absolute;height:14px;width:14px;left:3px;top:50%;transform:translateY(-50%);background:var(--text-2);border-radius:50%;transition:.25s}
+.toggle input:checked + .toggle-slider{background:linear-gradient(135deg,var(--brand-purple),var(--brand-purple-deep));border-color:var(--brand-purple)}
+.toggle input:checked + .toggle-slider:before{transform:translate(16px,-50%);background:#fff}
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle-wrap label{font-size:13px;color:var(--text-1);font-weight:500;cursor:pointer}
+
+/* ============ BENCHMARK ROWS ============ */
+.bench-row{display:grid;grid-template-columns:1fr 110px 110px 110px 100px;gap:12px;padding:14px 16px;background:var(--bg-2);border:1px solid var(--border);border-radius:12px;align-items:center;margin-bottom:10px}
+.bench-row.you{background:linear-gradient(160deg,rgba(139,63,183,0.12) 0%,rgba(245,158,11,0.06) 100%);border-color:var(--border-hi)}
+.bench-name{font-weight:600;font-size:14px}
+.bench-tag{font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:0.06em}
+.bench-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;text-align:right}
+.delta-pos{color:var(--success)}
+.delta-neg{color:var(--danger)}
+
+/* ============ BUY VS RENT ============ */
+.br-card{background:var(--bg-1);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.br-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.br-title{font-weight:700;font-size:15px}
+.br-tag{font-size:10px;padding:3px 8px;border-radius:999px;background:var(--surface);color:var(--text-2);font-weight:600;letter-spacing:0.04em;text-transform:uppercase}
+.br-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:14px}
+.br-metric{background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:12px}
+.br-metric-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-2);font-weight:600}
+.br-metric-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;margin-top:4px}
+.br-bar{height:8px;background:var(--bg-3);border-radius:999px;overflow:hidden;position:relative;margin-top:12px}
+.br-bar-fill{height:100%;background:linear-gradient(90deg,var(--brand-purple),var(--brand-orange));border-radius:999px;transition:width .5s ease}
+.br-verdict{padding:12px 14px;border-radius:10px;font-size:13px;font-weight:600;margin-top:12px;display:flex;align-items:center;gap:10px;line-height:1.5}
+.br-verdict.buy{background:var(--success-bg);color:#6EE7B7;border:1px solid rgba(16,185,129,0.3)}
+.br-verdict.rent{background:rgba(96,165,250,0.12);color:#93C5FD;border:1px solid rgba(96,165,250,0.3)}
+.br-verdict.tie{background:rgba(245,158,11,0.12);color:#FBBF24;border:1px solid rgba(245,158,11,0.3)}
+
+/* ============ CASH FLOW ============ */
+.cf-timeline{display:flex;gap:0;background:var(--bg-1);border:1px solid var(--border);border-radius:12px;overflow:hidden;height:60px;margin:12px 0 20px}
+.cf-segment{flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;position:relative;border-right:1px solid rgba(0,0,0,0.2)}
+.cf-segment:last-child{border-right:none}
+.cf-event{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--bg-1);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.cf-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-2);font-weight:600}
+.cf-desc{font-weight:600;font-size:13px;flex:1;margin:0 12px}
+.cf-amount{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px}
+.cf-in{color:var(--success)}
+.cf-out{color:var(--danger)}
+
+/* ============ SENSITIVITY MATRIX ============ */
+.sens-grid{display:grid;grid-template-columns:auto repeat(5,1fr);gap:6px;font-family:'JetBrains Mono',monospace}
+.sens-cell{padding:10px 8px;background:var(--bg-2);border-radius:6px;text-align:center;font-size:12px;font-weight:600}
+.sens-label{background:transparent;color:var(--text-2);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.04em}
+.sens-axis{background:var(--bg-3);color:var(--text-1)}
+
+/* ============ CATALOG MODAL ============ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg-1);border:1px solid var(--border-hi);border-radius:20px;width:min(800px,calc(100vw - 32px));max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 100px rgba(0,0,0,0.6)}
+.modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:between;gap:12px}
+.modal-hdr h3{flex:1;font-weight:700;font-size:16px}
+.modal-body{padding:18px 22px;overflow-y:auto;flex:1}
+.catalog-group{margin-bottom:18px}
+.catalog-group-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--brand-purple-light);margin-bottom:10px}
+.catalog-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:all .2s}
+.catalog-item:hover{background:var(--bg-3);border-color:var(--brand-purple)}
+.catalog-name{font-weight:600;font-size:13px}
+.catalog-desc{color:var(--text-2);font-size:11px;margin-top:2px}
+.catalog-price{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px}
+
+/* ============ PROVIDER LIST ============ */
+.sup-card{background:var(--bg-1);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px}
+.sup-name{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sup-source{font-size:11px;color:var(--text-2);font-weight:500}
+.sup-bd{margin-top:12px;font-size:12px;color:var(--text-1);line-height:1.6}
+.sup-amount{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--brand-orange-light);margin-top:8px}
+
+/* ============ HELPER COLORS ============ */
+.txt-success{color:var(--success)}
+.txt-danger{color:var(--danger)}
+.txt-warning{color:var(--warning)}
+.txt-muted{color:var(--text-2)}
+.txt-brand{background:linear-gradient(90deg,var(--brand-purple-light),var(--brand-orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ============ PRINT ============ */
+@media print{
+  body{background:#fff;color:#000}
+  .tabs,.sticky-footer,.btn,.no-print{display:none!important}
+  .panel{display:block!important;page-break-after:always}
+  .card,.kpi,.table-wrap,.br-card,.cf-event,.sup-card{background:#fff;border-color:#000;color:#000}
+  .kpi-value,.kpi-label{color:#000!important}
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:768px){
+  .app{padding:16px 14px 140px}
+  .hdr{flex-direction:column;align-items:flex-start;gap:12px}
+  .hdr-meta{width:100%;justify-content:flex-start;flex-wrap:wrap}
+  .sticky-footer{gap:14px;padding:12px 14px}
+  .sf-value{font-size:13px}
+  .sf-label{font-size:9px}
+  .bench-row{grid-template-columns:1fr 1fr;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ HEADER ============ -->
+  <header class="hdr">
+    <div class="hdr-brand">
+      <div class="logo">C</div>
+      <div>
+        <div class="hdr-title">Centauro ADS · Asesor Estratégico Rental</div>
+        <div class="hdr-subtitle">Cotizador inteligente · Buy vs Rent · KPIs · Mundial 2026</div>
+      </div>
+    </div>
+    <div class="hdr-meta">
+      <div class="hdr-pill"><span class="dot"></span>Auto-guardado</div>
+      <button class="btn btn-ghost" onclick="exportarJSON()">↓ Exportar</button>
+      <button class="btn btn-ghost" onclick="importarJSON()">↑ Importar</button>
+      <button class="btn btn-accent" onclick="window.print()">⎙ PDF</button>
+    </div>
+  </header>
+
+  <!-- ============ TABS ============ -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="config"><span class="tab-icon">◐</span>Configuración</button>
+    <button class="tab" data-tab="quote"><span class="tab-icon">◇</span>Cotizador</button>
+    <button class="tab" data-tab="buyrent"><span class="tab-icon">◆</span>Buy vs Rent</button>
+    <button class="tab" data-tab="dashboard"><span class="tab-icon">◉</span>Dashboard KPIs</button>
+    <button class="tab" data-tab="cashflow"><span class="tab-icon">◈</span>Flujo de Caja</button>
+    <button class="tab" data-tab="bench"><span class="tab-icon">◊</span>Benchmark</button>
+  </nav>
+
+  <!-- ============ PANEL: CONFIG ============ -->
+  <section class="panel active" id="panel-config">
+    <div class="section-title">Datos del Cliente y Proyecto</div>
+    <div class="grid grid-2" style="margin-bottom:28px">
+      <div class="card">
+        <div class="grid grid-2">
+          <div class="field"><label class="field-label">Razón Social Cliente</label><input class="input" id="cli_razon" placeholder="Ej. Empresa Patrocinante C.A." onchange="save()"></div>
+          <div class="field"><label class="field-label">RIF</label><input class="input" id="cli_rif" placeholder="J-12345678-9" onchange="save()"></div>
+          <div class="field"><label class="field-label">Contacto</label><input class="input" id="cli_contacto" placeholder="Nombre · Cargo" onchange="save()"></div>
+          <div class="field"><label class="field-label">Email / Teléfono</label><input class="input" id="cli_email" placeholder="contacto@empresa.com" onchange="save()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid grid-2">
+          <div class="field"><label class="field-label">Nombre del Evento</label><input class="input" id="ev_nombre" value="Mundial 2026 · Activación BTL" onchange="save()"></div>
+          <div class="field"><label class="field-label">Cotización N°</label><input class="input" id="ev_num" placeholder="CTA-2026-001" onchange="save()"></div>
+          <div class="field"><label class="field-label">Fecha Inicio</label><input class="input" type="date" id="ev_inicio" value="2026-06-11" onchange="save();calcular()"></div>
+          <div class="field"><label class="field-label">Fecha Fin</label><input class="input" type="date" id="ev_fin" value="2026-07-19" onchange="save();calcular()"></div>
+          <div class="field" style="grid-column:span 2"><label class="field-label">Locaciones Proyectadas</label><input class="input" id="ev_locaciones" value="CC San Ignacio · Caracas" onchange="save()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Parámetros Financieros</div>
+    <div class="section-subtitle">Las tasas de cambio se usan para estandarizar costos en USD de referencia. La <b>tasa paralela</b> protege tu margen frente a la brecha cambiaria al recibir cobros en Bs.</div>
+    <div class="grid grid-3" style="margin-bottom:18px">
+      <div class="card">
+        <div class="field"><label class="field-label">Tasa BCV · USD</label><input class="input" type="number" id="tasa_bcv_usd" value="55.79" step="0.01" onchange="save();calcular()"><span class="field-hint">Bs por 1 USD oficial</span></div>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Tasa BCV · EUR</label><input class="input" type="number" id="tasa_bcv_eur" value="64.82" step="0.01" onchange="save();calcular()"><span class="field-hint">Bs por 1 EUR oficial</span></div>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Tasa Mercado · USD Paralelo</label><input class="input" type="number" id="tasa_paralelo" value="61.55" step="0.01" onchange="save();calcular()"><span class="field-hint">Bs por 1 USD mercado real</span></div>
+      </div>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:28px">
+      <div class="card">
+        <div class="field"><label class="field-label">Días Totales Evento</label><input class="input" type="number" id="evento_dias" value="34" onchange="save();recalcDias();calcular()"></div>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label"># Partidos / Activaciones</label><input class="input" type="number" id="evento_partidos" value="34" onchange="save();calcular()"></div>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Margen Centauro (%)</label><input class="input" type="number" id="margen_pct" value="35" onchange="save();calcular()"></div>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Conversión EUR→USD</label>
+          <select class="select" id="conv_eur" onchange="save();calcular()">
+            <option value="cross_paralelo">Cross BCV / Paralelo (protectiva)</option>
+            <option value="cross_bcv">Cross BCV / BCV (oficial)</option>
+            <option value="mercado">Mercado directo 1 EUR = 1.08 USD</option>
+          </select>
+          <span class="field-hint">"Protectiva" cubre la brecha cambiaria al cobrar en Bs</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Impuestos y Términos Comerciales</div>
+    <div class="grid grid-4" style="margin-bottom:28px">
+      <div class="card">
+        <div class="toggle-wrap" style="margin-bottom:10px"><label class="toggle"><input type="checkbox" id="iva_aplica" checked onchange="save();calcular()"><span class="toggle-slider"></span></label><label>Aplicar IVA al cliente</label></div>
+        <div class="field"><label class="field-label">Tasa IVA (%)</label><input class="input" type="number" id="iva_pct" value="16" step="0.5" onchange="save();calcular()"></div>
+      </div>
+      <div class="card">
+        <div class="toggle-wrap" style="margin-bottom:10px"><label class="toggle"><input type="checkbox" id="islr_aplica" onchange="save();calcular()"><span class="toggle-slider"></span></label><label>Retención ISLR</label></div>
+        <div class="field"><label class="field-label">% Retención ISLR</label><input class="input" type="number" id="islr_pct" value="2" step="0.5" onchange="save();calcular()"></div>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">% Anticipo Cliente</label><input class="input" type="number" id="cobro_anticipo" value="50" onchange="save();calcular()"><span class="field-hint">Resto al cierre del evento</span></div>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">% Anticipo a Proveedor</label><input class="input" type="number" id="pago_anticipo" value="50" onchange="save();calcular()"><span class="field-hint">50% al montaje + 50% al 26/06</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">Costos Fijos Mensuales (para Breakeven)</div>
+    <div class="section-subtitle">Centauro debe cubrir esto independientemente del evento. Se usa para calcular el punto de equilibrio.</div>
+    <div class="grid grid-3" style="margin-bottom:8px">
+      <div class="card"><div class="field"><label class="field-label">Nómina mensual (USD)</label><input class="input" type="number" id="fix_nomina" value="3500" onchange="save();calcular()"></div></div>
+      <div class="card"><div class="field"><label class="field-label">Oficina / Servicios (USD)</label><input class="input" type="number" id="fix_oficina" value="800" onchange="save();calcular()"></div></div>
+      <div class="card"><div class="field"><label class="field-label">Marketing + Otros (USD)</label><input class="input" type="number" id="fix_otros" value="500" onchange="save();calcular()"></div></div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL: QUOTE ============ -->
+  <section class="panel" id="panel-quote">
+    <div class="section-title">Cotizador de Rubros</div>
+    <div class="section-subtitle">Cada línea contribuye al costo base. Marca "Propio" si Centauro aporta el equipo: el sistema imputará el costo amortizado por evento en lugar del alquiler externo.</div>
+
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="table-toolbar-left">
+          <button class="btn btn-primary btn-sm" onclick="openCatalog()">+ Catálogo</button>
+          <button class="btn btn-ghost btn-sm" onclick="agregarFila()">+ Línea en blanco</button>
+        </div>
+        <div class="table-toolbar-left">
+          <button class="btn btn-ghost btn-sm" onclick="duplicarSeleccion()">⎘ Duplicar última</button>
+          <button class="btn btn-danger btn-sm" onclick="limpiarTabla()">⌫ Vaciar</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th style="min-width:240px">Concepto</th>
+              <th>Categoría</th>
+              <th>Moneda</th>
+              <th>Costo Unit.</th>
+              <th>Cant.</th>
+              <th>Días</th>
+              <th>Propio</th>
+              <th title="CAPEX USD si es propio">CAPEX USD</th>
+              <th title="Vida útil en eventos">Vida·Ev</th>
+              <th>Total USD</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid grid-3" style="margin-top:24px">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:8px">Por Categoría</div>
+        <div id="cat-breakdown" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+      <div class="card card-hi">
+        <div class="section-title" style="margin-bottom:8px">Costo Operativo Base</div>
+        <div class="kpi-value txt-brand" id="q_costo_base">$ 0.00</div>
+        <div class="kpi-sub">Suma de todos los rubros (estandarizado en USD)</div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:8px">Costo por Día de Operación</div>
+        <div class="kpi-value mono" id="q_costo_dia">$ 0.00</div>
+        <div class="kpi-sub">Útil para vender activaciones puntuales</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL: BUY VS RENT ============ -->
+  <section class="panel" id="panel-buyrent">
+    <div class="section-title">Análisis Estratégico: Comprar vs Alquilar</div>
+    <div class="section-subtitle">Para cada equipo marcado "Propio" en el cotizador, el sistema compara el CAPEX vs el costo equivalente de alquiler externo. Muestra breakeven, ROI, valor residual y veredicto.</div>
+
+    <div class="grid grid-4" style="margin-bottom:20px">
+      <div class="card"><div class="field"><label class="field-label">Eventos/año proyectados</label><input class="input" type="number" id="br_eventos_anio" value="6" onchange="save();calcular()"></div></div>
+      <div class="card"><div class="field"><label class="field-label">Vida útil default (eventos)</label><input class="input" type="number" id="br_vida_default" value="60" onchange="save();calcular()"></div></div>
+      <div class="card"><div class="field"><label class="field-label">Valor residual (% del CAPEX)</label><input class="input" type="number" id="br_residual_pct" value="30" onchange="save();calcular()"></div></div>
+      <div class="card"><div class="field"><label class="field-label">Costo mantenimiento (% CAPEX/año)</label><input class="input" type="number" id="br_mant_pct" value="8" onchange="save();calcular()"></div></div>
+    </div>
+
+    <div id="br-cards"></div>
+  </section>
+
+  <!-- ============ PANEL: DASHBOARD ============ -->
+  <section class="panel" id="panel-dashboard">
+    <div class="section-title">Dashboard Estratégico</div>
+
+    <!-- KPI cards principales -->
+    <div class="grid grid-4" style="margin-bottom:24px">
+      <div class="kpi brand"><div class="kpi-label">Precio de Venta</div><div class="kpi-value" id="k_venta">$ 0</div><div class="kpi-sub">Total cobrado al cliente</div></div>
+      <div class="kpi success"><div class="kpi-label">Margen Bruto</div><div class="kpi-value" id="k_margen">$ 0</div><div class="kpi-sub" id="k_margen_pct">0% sobre venta</div></div>
+      <div class="kpi"><div class="kpi-label">Costo Operativo</div><div class="kpi-value" id="k_costo">$ 0</div><div class="kpi-sub">Pagado a terceros + amortización</div></div>
+      <div class="kpi warning"><div class="kpi-label">Margen Neto</div><div class="kpi-value" id="k_neto">$ 0</div><div class="kpi-sub" id="k_neto_pct">Tras costos fijos prorrateados</div></div>
+    </div>
+
+    <!-- KPI cards secundarios -->
+    <div class="grid grid-4" style="margin-bottom:24px">
+      <div class="kpi"><div class="kpi-label">Facturación en Bs (oficial)</div><div class="kpi-value mono" id="k_bs">Bs 0</div><div class="kpi-sub">A tasa BCV vigente</div></div>
+      <div class="kpi"><div class="kpi-label">Breakeven Mensual</div><div class="kpi-value" id="k_bep">0 días</div><div class="kpi-sub">Días vendidos al precio actual para cubrir fijos</div></div>
+      <div class="kpi"><div class="kpi-label">ROI del Proyecto</div><div class="kpi-value" id="k_roi">0%</div><div class="kpi-sub">(Venta − Costo) / Costo</div></div>
+      <div class="kpi"><div class="kpi-label">Capital de Trabajo</div><div class="kpi-value mono" id="k_cap">$ 0</div><div class="kpi-sub">Brecha máxima entre pagos y cobros</div></div>
+    </div>
+
+    <!-- Margen por categoría -->
+    <div class="grid grid-2" style="margin-bottom:24px">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:16px">Contribución por Categoría</div>
+        <div id="cat-contribucion"></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:16px">Margen vs Costo (Visual)</div>
+        <canvas id="canvas-donut" width="320" height="240" style="max-width:100%"></canvas>
+        <div id="donut-legend" style="display:flex;gap:18px;justify-content:center;margin-top:12px;font-size:12px;color:var(--text-1)"></div>
+      </div>
+    </div>
+
+    <!-- Sensibilidad cambiaria -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="section-title" style="margin-bottom:6px">Sensibilidad Cambiaria · Brecha BCV / Paralelo</div>
+      <div class="section-subtitle">Margen neto USD ante variaciones del paralelo (filas) y del BCV USD (columnas). La celda central es el escenario actual.</div>
+      <div class="sens-grid" id="sens-grid"></div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL: CASH FLOW ============ -->
+  <section class="panel" id="panel-cashflow">
+    <div class="section-title">Flujo de Caja del Proyecto</div>
+    <div class="section-subtitle">Calendario detallado de entradas (cobros del cliente) y salidas (pagos a proveedores). Identifica el capital de trabajo necesario antes de aceptar el proyecto.</div>
+
+    <div class="grid grid-3" style="margin-bottom:20px">
+      <div class="kpi success"><div class="kpi-label">Total Entradas</div><div class="kpi-value mono" id="cf_in">$ 0</div></div>
+      <div class="kpi danger"><div class="kpi-label">Total Salidas</div><div class="kpi-value mono" id="cf_out">$ 0</div></div>
+      <div class="kpi brand"><div class="kpi-label">Saldo Neto</div><div class="kpi-value mono" id="cf_net">$ 0</div></div>
+    </div>
+
+    <div class="cf-timeline" id="cf-timeline"></div>
+
+    <div class="grid grid-2">
+      <div>
+        <div class="section-title">Cobros (Cliente → Centauro)</div>
+        <div id="cf-cobros"></div>
+      </div>
+      <div>
+        <div class="section-title">Pagos (Centauro → Proveedores)</div>
+        <div id="cf-pagos"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL: BENCHMARK ============ -->
+  <section class="panel" id="panel-bench">
+    <div class="section-title">Benchmark vs Proveedores</div>
+    <div class="section-subtitle">Compara tu cotización con las referencias de mercado obtenidas. El delta muestra cuánto ahorra o gana Centauro por cada opción.</div>
+
+    <div class="section-title" style="margin-top:24px">Referencia Sonido · 34 días</div>
+    <div id="bench-sonido"></div>
+
+    <div class="section-title" style="margin-top:24px">Referencia Pantalla LED · 34 días</div>
+    <div id="bench-pantalla"></div>
+
+    <div class="section-title" style="margin-top:24px">Fuentes Originales</div>
+    <div class="grid grid-2">
+      <div class="sup-card">
+        <div class="sup-name">Proveedor Europeo · Sonido <span class="sup-source">EUR · No incluye IVA</span></div>
+        <div class="sup-bd">
+          • <b>Sonido Pequeño:</b> JBL + consola, 2 micrófonos, 1 monitor, DJ pauta 8h, equipos Pioneer, operador y viáticos.<br>
+          • <b>Sonido Grande:</b> Line Array Vertec 4888DP + 4 bajos dobles STX828 JBL, consola Soundcraft, 2 micrófonos, 2 monitores de piso, DJ Pioneer, operador, viáticos.<br>
+          • <b>Términos:</b> 50% reserva al montaje + 50% al 26/06/2026.<br>
+          • <b>Cobertura:</b> Instalación día 1, desmontaje día 34.
+        </div>
+        <div class="sup-amount">€ 21.360 — €27.615 / evento</div>
+      </div>
+      <div class="sup-card">
+        <div class="sup-name">Allegro · Musical Country C.A. <span class="sup-source">USD · IVA 16% incluido</span></div>
+        <div class="sup-bd">
+          • Cornetas Wharfedale SHO 2x15 PRO 2000W RMS Par<br>
+          • Power Top PRO TRX600<br>
+          • Consola Yamaha 10C<br>
+          • 2× Cable corneta 20m + 2× Cable micrófono 3m + Cable micrófono 15m + Cable audio PRO<br>
+          • Micrófono Yamaha<br>
+          • <b>Compra (CAPEX):</b> activo de Centauro, vida útil estimada 60+ eventos
+        </div>
+        <div class="sup-amount">$ 16.047,86 USD <span style="font-size:12px;color:var(--text-2);font-weight:500">(SubT $13.834,36 + IVA $2.213,50)</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ STICKY FOOTER ============ -->
+<div class="sticky-footer">
+  <div class="sf-item"><span class="sf-label">Costo Base</span><span class="sf-value mono" id="sf_costo">$ 0</span></div>
+  <div class="sf-divider"></div>
+  <div class="sf-item"><span class="sf-label">Venta Cliente</span><span class="sf-value mono brand" id="sf_venta">$ 0</span></div>
+  <div class="sf-divider"></div>
+  <div class="sf-item"><span class="sf-label">Margen</span><span class="sf-value mono" id="sf_margen" style="color:#34D399">$ 0</span></div>
+  <div class="sf-divider"></div>
+  <div class="sf-item"><span class="sf-label">Margen %</span><span class="sf-value mono" id="sf_margenpct" style="color:#34D399">0%</span></div>
+  <div class="sf-divider"></div>
+  <div class="sf-item"><span class="sf-label">Bs (BCV)</span><span class="sf-value mono" id="sf_bs">Bs 0</span></div>
+</div>
+
+<!-- ============ CATALOG MODAL ============ -->
+<div class="modal-bg" id="modal-catalog" onclick="if(event.target===this)closeCatalog()">
+  <div class="modal">
+    <div class="modal-hdr"><h3>Catálogo de Equipos y Servicios</h3><button class="btn btn-ghost btn-icon" onclick="closeCatalog()">✕</button></div>
+    <div class="modal-body" id="catalog-list"></div>
+  </div>
+</div>
+
+<input type="file" id="file-import" accept=".json" style="display:none" onchange="onImport(event)">
+
+<script>
+/* =================================================================
+   CATÁLOGO PRECARGADO — basado en cotizaciones reales obtenidas
+   ================================================================= */
+const CATALOG = [
+  {grupo:'PANTALLAS LED',items:[
+    {nombre:'LED P2.5 Indoor 3x2m + Scaler', cat:'Infraestructura', moneda:'USD', costo:480, dias:34, capex:18000, vida:80, desc:'Activación bajo techo de alta resolución'},
+    {nombre:'LED P3 Outdoor 3x2m + Scaler + Truss', cat:'Infraestructura', moneda:'USD', costo:562.14, dias:34, capex:22000, vida:60, desc:'Estándar exterior · uso comprobado'},
+    {nombre:'LED P4 Outdoor 4x3m + Scaler + Truss', cat:'Infraestructura', moneda:'USD', costo:780, dias:34, capex:34000, vida:60, desc:'Pantalla grande para audiencias 100+'},
+    {nombre:'LED P5 Outdoor 6x4m + Scaler + Truss', cat:'Infraestructura', moneda:'USD', costo:1150, dias:34, capex:52000, vida:50, desc:'Formato stadium · alta visibilidad'},
+    {nombre:'Pantalla 3D Forced Perspective P3', cat:'Infraestructura', moneda:'USD', costo:1450, dias:34, capex:48000, vida:40, desc:'Efecto pop-out · diferencial premium'}
+  ]},
+  {grupo:'SONIDO',items:[
+    {nombre:'Sonido Pequeño JBL (DJ 8h) [Ref. Europeo]', cat:'Infraestructura', moneda:'EUR', costo:628.24, dias:34, capex:14000, vida:80, desc:'JBL+consola+2micros+1monitor+DJ+operador'},
+    {nombre:'Sonido Grande Line Array Vertec 4888DP', cat:'Infraestructura', moneda:'EUR', costo:812.21, dias:34, capex:38000, vida:60, desc:'JBL Line Array+4 bajos STX828+Soundcraft'},
+    {nombre:'Sonido Propio Wharfedale+Yamaha (Allegro)', cat:'Infraestructura', moneda:'USD', costo:0, dias:34, propio:true, capex:16048, vida:60, desc:'Activo Centauro · CAPEX único'},
+    {nombre:'DJ Profesional (8h continuas)', cat:'Logística', moneda:'USD', costo:180, dias:1, desc:'Pauta musical incluida'}
+  ]},
+  {grupo:'OPERACIÓN Y RECURSO HUMANO',items:[
+    {nombre:'Operador de Video', cat:'Logística', moneda:'USD', costo:100, dias:34, desc:'Por día · viáticos incluidos'},
+    {nombre:'Técnico de Sonido', cat:'Logística', moneda:'USD', costo:100, dias:34, desc:'Por día · viáticos incluidos'},
+    {nombre:'Asistente de Montaje', cat:'Logística', moneda:'USD', costo:45, dias:2, desc:'Día montaje + desmontaje'},
+    {nombre:'Supervisor de Activación', cat:'Logística', moneda:'USD', costo:80, dias:34, desc:'Coordina operación en locación'},
+    {nombre:'Hostess / Brand Ambassador', cat:'Logística', moneda:'USD', costo:60, dias:34, desc:'Interacción con público · captura leads'}
+  ]},
+  {grupo:'TRANSPORTE Y LOGÍSTICA',items:[
+    {nombre:'Transporte de equipos (ida + vuelta)', cat:'Logística', moneda:'USD', costo:350, dias:2, desc:'Camión + chofer + combustible'},
+    {nombre:'Generador eléctrico 15KVA', cat:'Infraestructura', moneda:'USD', costo:120, dias:34, desc:'Backup energético para outdoor'},
+    {nombre:'Seguro de equipos en locación', cat:'Logística', moneda:'USD', costo:280, dias:1, desc:'Pago único por todo el evento'}
+  ]},
+  {grupo:'PHYGITAL Y AGENCIA',items:[
+    {nombre:'Landing Page Captación de Leads', cat:'Agencia', moneda:'USD', costo:1500, dias:1, desc:'Pago único · diseño + dev + QR'},
+    {nombre:'Códigos QR dinámicos + tracking', cat:'Agencia', moneda:'USD', costo:300, dias:1, desc:'Incluye analytics por activación'},
+    {nombre:'Reporting Semanal de Leads', cat:'Agencia', moneda:'USD', costo:300, dias:5, desc:'Por semana del evento'},
+    {nombre:'Producción Audiovisual (spot 30s)', cat:'Agencia', moneda:'USD', costo:2500, dias:1, desc:'Para reproducir en pantalla LED'},
+    {nombre:'Community Manager (cobertura)', cat:'Agencia', moneda:'USD', costo:80, dias:34, desc:'Cobertura RR.SS. diaria'},
+    {nombre:'Fee de Gestión de Proyecto', cat:'Agencia', moneda:'USD', costo:1800, dias:1, desc:'Coordinación integral pre/durante/post'}
+  ]}
+];
+
+/* =================================================================
+   BENCHMARK PROVEEDORES (refs. reales)
+   ================================================================= */
+const BENCH = {
+  sonido:[
+    {nombre:'Proveedor Europeo · Sonido Pequeño', total:21360, moneda:'EUR', nota:'34 días · sin IVA'},
+    {nombre:'Proveedor Europeo · Sonido Grande', total:27615, moneda:'EUR', nota:'34 días · sin IVA'},
+    {nombre:'Allegro · Compra Sistema Sonido', total:16047.86, moneda:'USD', nota:'CAPEX único · con IVA 16%', isCapex:true}
+  ],
+  pantalla:[
+    {nombre:'Proveedor LED · P3 Outdoor 3x2m', total:19112.76, moneda:'USD', nota:'34 días · estándar de mercado'}
+  ]
+};
+
+/* =================================================================
+   ESTADO
+   ================================================================= */
+let state = {items:[], lastTab:'config'};
+const STORAGE_KEY='centauro_cotizador_v1';
+
+const CAT_OPTS = ['Infraestructura','Logística','Agencia'];
+const MONEDAS = ['USD','EUR'];
+
+/* =================================================================
+   INIT
+   ================================================================= */
+function init(){
+  // Tabs
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click',()=>switchTab(t.dataset.tab));
+  });
+  // Cargar estado
+  cargarEstado();
+  // Si no hay items, precargar muestra
+  if(!state.items.length){
+    state.items = [
+      buildItem(CATALOG[0].items[1]), // LED P3
+      buildItem(CATALOG[1].items[1]), // Sonido Grande EUR
+      buildItem(CATALOG[2].items[0], {cant:1}), // Operador video
+      buildItem(CATALOG[2].items[1], {cant:1}), // Técnico sonido
+      buildItem(CATALOG[4].items[0]), // Landing
+      buildItem(CATALOG[4].items[5])  // Fee gestión
+    ];
+  }
+  renderTabla();
+  recalcDias();
+  calcular();
+}
+
+function buildItem(catItem, overrides={}){
+  return {
+    id: crypto.randomUUID(),
+    nombre: catItem.nombre,
+    cat: catItem.cat,
+    moneda: catItem.moneda,
+    costo: catItem.costo,
+    cant: 1,
+    dias: catItem.dias || 1,
+    propio: !!catItem.propio,
+    capex: catItem.capex || 0,
+    vida: catItem.vida || 60,
+    ...overrides
+  };
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+name));
+  state.lastTab = name;
+  save();
+  if(name==='dashboard') renderDashboard();
+  if(name==='buyrent') renderBuyRent();
+  if(name==='cashflow') renderCashflow();
+  if(name==='bench') renderBenchmark();
+}
+
+/* =================================================================
+   TABLA COTIZADOR
+   ================================================================= */
+function renderTabla(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  state.items.forEach((it,idx)=>{
+    const tr = document.createElement('tr');
+    tr.dataset.id = it.id;
+    const catClass = it.cat==='Infraestructura'?'cat-infra':it.cat==='Logística'?'cat-logi':'cat-agen';
+    tr.innerHTML = `
+      <td><input class="input" data-f="nombre" value="${escapeHtml(it.nombre)}"></td>
+      <td>
+        <select class="select" data-f="cat">
+          ${CAT_OPTS.map(c=>`<option ${c===it.cat?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select class="select" data-f="moneda">
+          ${MONEDAS.map(m=>`<option ${m===it.moneda?'selected':''}>${m}</option>`).join('')}
+        </select>
+      </td>
+      <td><input class="input mono" type="number" step="0.01" data-f="costo" value="${it.costo}"></td>
+      <td><input class="input mono" type="number" data-f="cant" value="${it.cant}" style="max-width:70px"></td>
+      <td><input class="input mono" type="number" data-f="dias" value="${it.dias}" style="max-width:70px"></td>
+      <td style="text-align:center"><label class="toggle"><input type="checkbox" data-f="propio" ${it.propio?'checked':''}><span class="toggle-slider"></span></label></td>
+      <td><input class="input mono" type="number" data-f="capex" value="${it.capex}" placeholder="0" ${it.propio?'':'disabled style="opacity:.4"'}></td>
+      <td><input class="input mono" type="number" data-f="vida" value="${it.vida}" style="max-width:70px" ${it.propio?'':'disabled style="opacity:.4"'}></td>
+      <td class="mono" data-r="total" style="font-weight:700;text-align:right">$ 0.00</td>
+      <td><button class="btn btn-danger btn-icon" onclick="eliminarFila('${it.id}')">✕</button></td>
+    `;
+    tr.querySelectorAll('[data-f]').forEach(inp=>{
+      inp.addEventListener('input',()=>updateItem(it.id, inp));
+      inp.addEventListener('change',()=>updateItem(it.id, inp));
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function updateItem(id, inp){
+  const it = state.items.find(x=>x.id===id);
+  if(!it) return;
+  const f = inp.dataset.f;
+  if(inp.type==='checkbox'){
+    it[f] = inp.checked;
+    renderTabla(); // refresh para enable/disable capex
+  } else if(inp.type==='number'){
+    it[f] = parseFloat(inp.value)||0;
+  } else if(inp.tagName==='SELECT'){
+    it[f] = inp.value;
+  } else {
+    it[f] = inp.value;
+  }
+  save();
+  calcular();
+}
+
+function agregarFila(){
+  state.items.push({id:crypto.randomUUID(),nombre:'Nuevo rubro',cat:'Infraestructura',moneda:'USD',costo:0,cant:1,dias:1,propio:false,capex:0,vida:60});
+  renderTabla();save();calcular();
+}
+function eliminarFila(id){
+  state.items = state.items.filter(x=>x.id!==id);
+  renderTabla();save();calcular();
+}
+function duplicarSeleccion(){
+  if(!state.items.length) return;
+  const last = state.items[state.items.length-1];
+  state.items.push({...last,id:crypto.randomUUID()});
+  renderTabla();save();calcular();
+}
+function limpiarTabla(){
+  if(!confirm('¿Vaciar toda la cotización?')) return;
+  state.items=[];renderTabla();save();calcular();
+}
+function recalcDias(){
+  const d = parseFloat(document.getElementById('evento_dias').value)||34;
+  state.items.forEach(it=>{
+    if(it.cat!=='Agencia') it.dias = d;
+  });
+  renderTabla();
+}
+
+/* =================================================================
+   CATÁLOGO MODAL
+   ================================================================= */
+function openCatalog(){
+  const cont = document.getElementById('catalog-list');
+  cont.innerHTML='';
+  CATALOG.forEach(grp=>{
+    const g = document.createElement('div');
+    g.className='catalog-group';
+    g.innerHTML = `<div class="catalog-group-title">${grp.grupo}</div>`;
+    grp.items.forEach((it,idx)=>{
+      const div = document.createElement('div');
+      div.className='catalog-item';
+      const priceTxt = it.propio ? `CAPEX ${formatMoney(it.capex,'USD')}` : `${formatMoney(it.costo,it.moneda)}/día`;
+      div.innerHTML = `
+        <div>
+          <div class="catalog-name">${it.nombre}</div>
+          <div class="catalog-desc">${it.cat} · ${it.desc||''}</div>
+        </div>
+        <div class="catalog-price">${priceTxt}</div>
+      `;
+      div.onclick = ()=>{ addFromCatalog(it); closeCatalog(); };
+      g.appendChild(div);
+    });
+    cont.appendChild(g);
+  });
+  document.getElementById('modal-catalog').classList.add('open');
+}
+function closeCatalog(){document.getElementById('modal-catalog').classList.remove('open');}
+function addFromCatalog(it){
+  state.items.push(buildItem(it));
+  renderTabla();save();calcular();
+}
+
+/* =================================================================
+   CONVERSIÓN DE MONEDA
+   ================================================================= */
+function toUSD(amount, moneda){
+  if(moneda==='USD') return amount;
+  if(moneda==='EUR'){
+    const bcvUsd = num('tasa_bcv_usd');
+    const bcvEur = num('tasa_bcv_eur');
+    const paralelo = num('tasa_paralelo');
+    const modo = document.getElementById('conv_eur').value;
+    if(modo==='cross_bcv') return amount * bcvEur / bcvUsd;
+    if(modo==='mercado') return amount * 1.08;
+    // protectiva (default): EUR -> Bs (BCV) -> USD (paralelo)
+    return amount * bcvEur / paralelo;
+  }
+  return amount;
+}
+function num(id){return parseFloat(document.getElementById(id).value)||0;}
+function chk(id){return document.getElementById(id).checked;}
+
+/* =================================================================
+   CÁLCULO PRINCIPAL
+   ================================================================= */
+function calcular(){
+  let costoBase = 0;
+  let porCategoria = {Infraestructura:0,Logística:0,Agencia:0};
+  let costoPropios = 0;
+  let costoAlquilado = 0;
+
+  state.items.forEach(it=>{
+    let usd;
+    if(it.propio && it.capex>0 && it.vida>0){
+      // Amortización por evento
+      const amortPorEvento = it.capex / it.vida;
+      const mantAnual = it.capex * (num('br_mant_pct')/100);
+      const eventosAnio = num('br_eventos_anio') || 1;
+      const mantPorEvento = mantAnual / eventosAnio;
+      usd = amortPorEvento + mantPorEvento;
+      costoPropios += usd;
+    } else {
+      const bruto = (it.costo||0) * (it.cant||0) * (it.dias||0);
+      usd = toUSD(bruto, it.moneda);
+      costoAlquilado += usd;
+    }
+    const fila = document.querySelector(`tr[data-id="${it.id}"] [data-r="total"]`);
+    if(fila) fila.textContent = '$ '+formatNum(usd);
+    costoBase += usd;
+    porCategoria[it.cat] = (porCategoria[it.cat]||0) + usd;
+  });
+
+  const margenPct = num('margen_pct');
+  const gananciaBase = costoBase * (margenPct/100);
+  const ventaSinIva = costoBase + gananciaBase;
+  const ivaPct = chk('iva_aplica') ? num('iva_pct') : 0;
+  const ivaMonto = ventaSinIva * (ivaPct/100);
+  const islrPct = chk('islr_aplica') ? num('islr_pct') : 0;
+  const islrMonto = ventaSinIva * (islrPct/100);
+  const ventaTotal = ventaSinIva + ivaMonto;
+  const cobroNeto = ventaTotal - islrMonto;
+  const facturacionBs = ventaTotal * num('tasa_bcv_usd');
+  const dias = num('evento_dias')||1;
+  const costoDia = costoBase / Math.max(dias,1);
+
+  // Costos fijos prorrateados al evento (mensuales × meses del evento)
+  const fixMensual = num('fix_nomina')+num('fix_oficina')+num('fix_otros');
+  const inicio = new Date(document.getElementById('ev_inicio').value);
+  const fin = new Date(document.getElementById('ev_fin').value);
+  const mesesEvento = Math.max(1, (fin-inicio)/(1000*60*60*24*30.4));
+  const costoFijoEvento = fixMensual * mesesEvento;
+  const margenNeto = gananciaBase - costoFijoEvento;
+  const margenNetoPct = ventaSinIva>0 ? (margenNeto/ventaSinIva)*100 : 0;
+
+  // Breakeven mensual: precio promedio por día y cuántos días al mes cubren fijos
+  const margenPorDia = (gananciaBase/Math.max(dias,1));
+  const diasBreakeven = margenPorDia>0 ? Math.ceil(fixMensual/margenPorDia) : 0;
+
+  // ROI del proyecto
+  const roi = costoBase>0 ? (gananciaBase/costoBase)*100 : 0;
+
+  // Capital de trabajo: brecha entre anticipos
+  const anticipoCobro = ventaTotal * (num('cobro_anticipo')/100);
+  const anticipoPago = costoBase * (num('pago_anticipo')/100);
+  const capitalTrabajo = Math.max(0, anticipoPago - anticipoCobro);
+
+  // ============ Renderizar ============
+  setVal('q_costo_base', '$ '+formatNum(costoBase));
+  setVal('q_costo_dia', '$ '+formatNum(costoDia));
+  renderCategorias(porCategoria);
+
+  // Sticky footer
+  setVal('sf_costo','$ '+formatNum(costoBase));
+  setVal('sf_venta','$ '+formatNum(ventaTotal));
+  setVal('sf_margen','$ '+formatNum(gananciaBase));
+  setVal('sf_margenpct',formatNum(margenPct)+'%');
+  setVal('sf_bs','Bs '+formatNum(facturacionBs));
+
+  // Dashboard
+  setVal('k_venta','$ '+formatNum(ventaTotal));
+  setVal('k_margen','$ '+formatNum(gananciaBase));
+  setVal('k_margen_pct',formatNum((gananciaBase/Math.max(ventaSinIva,1))*100,1)+'% sobre venta neta');
+  setVal('k_costo','$ '+formatNum(costoBase));
+  setVal('k_neto','$ '+formatNum(margenNeto));
+  setVal('k_neto_pct',formatNum(margenNetoPct,1)+'% neto · '+formatNum(mesesEvento,1)+' meses fijos');
+  setVal('k_bs','Bs '+formatNum(facturacionBs));
+  setVal('k_bep',diasBreakeven+' días');
+  setVal('k_roi',formatNum(roi,1)+'%');
+  setVal('k_cap','$ '+formatNum(capitalTrabajo));
+
+  // Guardar derivados para otros paneles
+  state.calc = {costoBase,gananciaBase,ventaSinIva,ventaTotal,facturacionBs,ivaMonto,islrMonto,cobroNeto,porCategoria,costoPropios,costoAlquilado,margenNeto,capitalTrabajo,anticipoCobro,anticipoPago};
+
+  // Si el panel está activo, re-render
+  if(state.lastTab==='dashboard') renderDashboard();
+  if(state.lastTab==='cashflow') renderCashflow();
+  if(state.lastTab==='buyrent') renderBuyRent();
+  if(state.lastTab==='bench') renderBenchmark();
+}
+
+function renderCategorias(cats){
+  const total = Object.values(cats).reduce((a,b)=>a+b,0);
+  const cont = document.getElementById('cat-breakdown');
+  if(!cont) return;
+  cont.innerHTML='';
+  Object.entries(cats).forEach(([k,v])=>{
+    const pct = total>0?(v/total)*100:0;
+    const cls = k==='Infraestructura'?'cat-infra':k==='Logística'?'cat-logi':'cat-agen';
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span class="cat-pill ${cls}">${k}</span>
+        <span class="mono" style="font-weight:600">$ ${formatNum(v)} · ${formatNum(pct,1)}%</span>
+      </div>
+      <div class="br-bar"><div class="br-bar-fill" style="width:${pct}%"></div></div>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+/* =================================================================
+   DASHBOARD
+   ================================================================= */
+function renderDashboard(){
+  if(!state.calc) return;
+  // Contribución por categoría
+  const cont = document.getElementById('cat-contribucion');
+  if(cont){
+    cont.innerHTML='';
+    const totalVenta = state.calc.ventaSinIva;
+    const margenPct = num('margen_pct')/100;
+    Object.entries(state.calc.porCategoria).forEach(([k,v])=>{
+      const venta = v*(1+margenPct);
+      const margen = venta - v;
+      const cls = k==='Infraestructura'?'cat-infra':k==='Logística'?'cat-logi':'cat-agen';
+      const contribPct = totalVenta>0?(venta/totalVenta)*100:0;
+      const div = document.createElement('div');
+      div.style.cssText='margin-bottom:14px;padding:12px;background:var(--bg-2);border-radius:10px';
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span class="cat-pill ${cls}">${k}</span>
+          <span class="mono" style="font-weight:700">$ ${formatNum(margen)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-2);display:flex;justify-content:space-between;margin-bottom:6px">
+          <span>Costo: $${formatNum(v)} · Venta: $${formatNum(venta)}</span>
+          <span>${formatNum(contribPct,1)}% de la venta</span>
+        </div>
+        <div class="br-bar"><div class="br-bar-fill" style="width:${contribPct}%"></div></div>
+      `;
+      cont.appendChild(div);
+    });
+  }
+  drawDonut();
+  renderSensibilidad();
+}
+
+function drawDonut(){
+  const cvs = document.getElementById('canvas-donut');
+  if(!cvs || !state.calc) return;
+  const ctx = cvs.getContext('2d');
+  const w = cvs.width, h = cvs.height;
+  ctx.clearRect(0,0,w,h);
+  const cx=w/2, cy=h/2, r=85, lw=42;
+  const costo = state.calc.costoBase;
+  const margen = state.calc.gananciaBase;
+  const total = costo+margen;
+  if(total<=0) return;
+  const pctMargen = margen/total;
+  // Costo (oscuro)
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2 + (1-pctMargen)*Math.PI*2);
+  ctx.strokeStyle='#3D2858';ctx.lineWidth=lw;ctx.stroke();
+  // Margen (gradient)
+  const grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0,'#8B3FB7');grad.addColorStop(1,'#F59E0B');
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,-Math.PI/2 + (1-pctMargen)*Math.PI*2,-Math.PI/2 + Math.PI*2);
+  ctx.strokeStyle=grad;ctx.lineWidth=lw;ctx.stroke();
+  // Texto centro
+  ctx.fillStyle='#F5F0FA';ctx.font='800 28px Inter';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText((pctMargen*100).toFixed(1)+'%',cx,cy-6);
+  ctx.fillStyle='#8A7FA0';ctx.font='600 10px Inter';
+  ctx.fillText('MARGEN',cx,cy+18);
+  // Leyenda
+  document.getElementById('donut-legend').innerHTML = `
+    <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#3D2858"></span>Costo $${formatNum(costo)}</span>
+    <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#8B3FB7,#F59E0B)"></span>Margen $${formatNum(margen)}</span>
+  `;
+}
+
+function renderSensibilidad(){
+  const grid = document.getElementById('sens-grid');
+  if(!grid) return;
+  const baseBcv = num('tasa_bcv_usd');
+  const baseParalelo = num('tasa_paralelo');
+  const variaciones = [-0.2,-0.1,0,0.1,0.2];
+  const labels = ['-20%','-10%','BASE','+10%','+20%'];
+  let html = `<div class="sens-cell sens-label">Paralelo →<br>↓ BCV</div>`;
+  labels.forEach(l=>html+=`<div class="sens-cell sens-label">${l}</div>`);
+  variaciones.forEach((vBcv,i)=>{
+    html += `<div class="sens-cell sens-axis">${labels[i]}</div>`;
+    variaciones.forEach(vPar=>{
+      const newBcv = baseBcv*(1+vBcv);
+      const newPar = baseParalelo*(1+vPar);
+      const margen = simulateMargen(newBcv, newPar);
+      const baseMargen = state.calc.gananciaBase;
+      const delta = baseMargen>0 ? ((margen-baseMargen)/baseMargen)*100 : 0;
+      let bg = 'var(--bg-2)';
+      let color = 'var(--text-0)';
+      if(vBcv===0 && vPar===0){ bg='linear-gradient(135deg,rgba(139,63,183,0.3),rgba(245,158,11,0.2))'; }
+      else if(delta>2) {color='#34D399'}
+      else if(delta<-2) {color='#F87171'}
+      html += `<div class="sens-cell" style="background:${bg};color:${color}">$${formatNum(margen,0)}<br><span style="font-size:9px;opacity:.7">${delta>0?'+':''}${formatNum(delta,1)}%</span></div>`;
+    });
+  });
+  grid.innerHTML = html;
+}
+
+function simulateMargen(newBcv, newPar){
+  let costo = 0;
+  const modo = document.getElementById('conv_eur').value;
+  state.items.forEach(it=>{
+    if(it.propio && it.capex>0 && it.vida>0){
+      const am = it.capex/it.vida;
+      const mant = (it.capex*(num('br_mant_pct')/100))/(num('br_eventos_anio')||1);
+      costo += am + mant;
+    } else {
+      let bruto = it.costo*it.cant*it.dias;
+      if(it.moneda==='EUR'){
+        const bcvEur = num('tasa_bcv_eur');
+        if(modo==='cross_bcv') bruto = bruto*bcvEur/newBcv;
+        else if(modo==='mercado') bruto = bruto*1.08;
+        else bruto = bruto*bcvEur/newPar;
+      }
+      costo += bruto;
+    }
+  });
+  return costo * (num('margen_pct')/100);
+}
+
+/* =================================================================
+   BUY VS RENT
+   ================================================================= */
+function renderBuyRent(){
+  const cont = document.getElementById('br-cards');
+  if(!cont) return;
+  cont.innerHTML='';
+  const items = state.items.filter(x=>x.capex>0 || x.propio);
+  if(!items.length){
+    cont.innerHTML = `<div class="card" style="text-align:center;color:var(--text-2);padding:40px"><b>Aún no hay rubros con CAPEX cargado.</b><br><br>Marca "Propio" en el cotizador o ingresa un valor CAPEX para que aparezca aquí el análisis estratégico.</div>`;
+    return;
+  }
+  const eventosAnio = num('br_eventos_anio');
+  const residualPct = num('br_residual_pct')/100;
+  const mantPct = num('br_mant_pct')/100;
+  const dias = num('evento_dias');
+  const margenPct = num('margen_pct')/100;
+
+  items.forEach(it=>{
+    const capex = it.capex||0;
+    const vida = it.vida || num('br_vida_default');
+    const amortPorEvento = capex/vida;
+    const mantAnual = capex*mantPct;
+    const mantPorEvento = mantAnual/Math.max(eventosAnio,1);
+    const costoPropioEvento = amortPorEvento + mantPorEvento;
+    // costo alquiler equivalente al evento
+    const costoAlquilerEvento = toUSD((it.costo||0)*(it.cant||1)*(it.dias||dias), it.moneda);
+    const ahorroEvento = costoAlquilerEvento - costoPropioEvento;
+    const breakevenEventos = ahorroEvento>0 ? Math.ceil(capex/ahorroEvento) : 999;
+    const breakevenMeses = breakevenEventos*(12/Math.max(eventosAnio,1));
+    const valorResidual = capex*residualPct;
+    const ahorro12m = ahorroEvento*eventosAnio;
+    const ahorro24m = ahorroEvento*eventosAnio*2;
+    const roi12 = capex>0?((ahorro12m+valorResidual*0.5-capex)/capex)*100:0;
+    const roi24 = capex>0?((ahorro24m+valorResidual-capex)/capex)*100:0;
+
+    let verdict='tie', verdictTxt='Evaluar caso por caso · ahorro marginal';
+    if(ahorroEvento>0 && breakevenEventos<=eventosAnio){
+      verdict='buy';
+      verdictTxt=`✓ COMPRAR · Se paga en ${breakevenEventos} evento(s) · luego ${formatNum(ahorroEvento)} USD ahorrados por evento`;
+    } else if(ahorroEvento>0 && breakevenEventos<=eventosAnio*2){
+      verdict='buy';
+      verdictTxt=`◐ COMPRAR (medio plazo) · Payback en ${formatNum(breakevenMeses,0)} meses · ROI 24m: ${formatNum(roi24,1)}%`;
+    } else if(ahorroEvento<=0){
+      verdict='rent';
+      verdictTxt=`✗ ALQUILAR · Comprar no genera ahorro · diferencia: ${formatNum(ahorroEvento)} USD/evento`;
+    } else {
+      verdict='rent';
+      verdictTxt=`◔ ALQUILAR · Payback >${formatNum(breakevenMeses/12,1)} años · capital atado innecesario`;
+    }
+
+    const ahorroBarPct = Math.min(100, Math.max(0, (ahorroEvento/Math.max(costoAlquilerEvento,1))*100));
+
+    const div = document.createElement('div');
+    div.className='br-card';
+    div.innerHTML = `
+      <div class="br-header">
+        <div>
+          <div class="br-title">${escapeHtml(it.nombre)}</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:2px">${it.cat} · ${it.moneda} · ${it.dias} días</div>
+        </div>
+        <span class="br-tag">CAPEX $ ${formatNum(capex)}</span>
+      </div>
+      <div class="br-grid">
+        <div class="br-metric"><div class="br-metric-label">Costo Alquilar /Evento</div><div class="br-metric-value">$ ${formatNum(costoAlquilerEvento)}</div></div>
+        <div class="br-metric"><div class="br-metric-label">Costo Propio /Evento</div><div class="br-metric-value txt-success">$ ${formatNum(costoPropioEvento)}</div></div>
+        <div class="br-metric"><div class="br-metric-label">Ahorro /Evento</div><div class="br-metric-value ${ahorroEvento>0?'txt-success':'txt-danger'}">$ ${formatNum(ahorroEvento)}</div></div>
+        <div class="br-metric"><div class="br-metric-label">Breakeven</div><div class="br-metric-value">${breakevenEventos>=999?'—':breakevenEventos+' ev.'}</div></div>
+        <div class="br-metric"><div class="br-metric-label">Payback</div><div class="br-metric-value">${breakevenEventos>=999?'—':formatNum(breakevenMeses,0)+' m'}</div></div>
+        <div class="br-metric"><div class="br-metric-label">ROI 12m</div><div class="br-metric-value ${roi12>0?'txt-success':'txt-danger'}">${formatNum(roi12,1)}%</div></div>
+        <div class="br-metric"><div class="br-metric-label">ROI 24m</div><div class="br-metric-value ${roi24>0?'txt-success':'txt-danger'}">${formatNum(roi24,1)}%</div></div>
+        <div class="br-metric"><div class="br-metric-label">Valor Residual</div><div class="br-metric-value">$ ${formatNum(valorResidual)}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-2);margin-bottom:4px">Ahorro vs Alquiler (${formatNum(ahorroBarPct,0)}%)</div>
+      <div class="br-bar"><div class="br-bar-fill" style="width:${ahorroBarPct}%"></div></div>
+      <div class="br-verdict ${verdict}">${verdictTxt}</div>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+/* =================================================================
+   CASH FLOW
+   ================================================================= */
+function renderCashflow(){
+  if(!state.calc) return;
+  const venta = state.calc.ventaTotal;
+  const costo = state.calc.costoBase;
+  const inicio = new Date(document.getElementById('ev_inicio').value);
+  const fin = new Date(document.getElementById('ev_fin').value);
+  const anticipoCobroPct = num('cobro_anticipo')/100;
+  const anticipoPagoPct = num('pago_anticipo')/100;
+
+  // Fecha proveedor (50% al 26/06 según presupuesto europeo)
+  const fProveedor1 = new Date(inicio);fProveedor1.setDate(fProveedor1.getDate()-3);
+  const fProveedor2 = new Date('2026-06-26');
+  const fCliente1 = new Date(inicio);fCliente1.setDate(fCliente1.getDate()-7);
+  const fCliente2 = new Date(fin);fCliente2.setDate(fCliente2.getDate()+7);
+
+  const cobros = [
+    {fecha:fCliente1,desc:`Anticipo cliente · ${(anticipoCobroPct*100)}%`,monto:venta*anticipoCobroPct,tipo:'in'},
+    {fecha:fCliente2,desc:`Saldo cliente · ${(100-anticipoCobroPct*100)}%`,monto:venta*(1-anticipoCobroPct),tipo:'in'}
+  ];
+  const pagos = [
+    {fecha:fProveedor1,desc:`Anticipo proveedor · ${(anticipoPagoPct*100)}% reserva/montaje`,monto:costo*anticipoPagoPct,tipo:'out'},
+    {fecha:fProveedor2,desc:`Saldo proveedor · ${(100-anticipoPagoPct*100)}% (26/06/2026)`,monto:costo*(1-anticipoPagoPct),tipo:'out'}
+  ];
+
+  setVal('cf_in','$ '+formatNum(venta));
+  setVal('cf_out','$ '+formatNum(costo));
+  setVal('cf_net','$ '+formatNum(venta-costo));
+
+  // Timeline visual: 4 segmentos según orden cronológico
+  const all = [...cobros,...pagos].sort((a,b)=>a.fecha-b.fecha);
+  const tl = document.getElementById('cf-timeline');
+  tl.innerHTML = '';
+  all.forEach(ev=>{
+    const seg = document.createElement('div');
+    seg.className='cf-segment';
+    seg.style.background = ev.tipo==='in' ? 'linear-gradient(135deg,#059669,#10B981)' : 'linear-gradient(135deg,#B91C1C,#EF4444)';
+    seg.title = `${formatDate(ev.fecha)} · ${ev.desc}`;
+    seg.innerHTML = `<div style="text-align:center;line-height:1.2"><div style="font-size:10px;opacity:.9">${ev.tipo==='in'?'COBRO':'PAGO'}</div><div style="font-weight:800">$${formatNum(ev.monto,0)}</div></div>`;
+    tl.appendChild(seg);
+  });
+
+  // Listas
+  const renderEvList = (arr, target, cls)=>{
+    const cont = document.getElementById(target);
+    cont.innerHTML = '';
+    arr.forEach(ev=>{
+      const div = document.createElement('div');
+      div.className='cf-event';
+      div.innerHTML = `
+        <span class="cf-date">${formatDate(ev.fecha)}</span>
+        <span class="cf-desc">${ev.desc}</span>
+        <span class="cf-amount ${cls}">${ev.tipo==='in'?'+':'-'} $${formatNum(ev.monto)}</span>
+      `;
+      cont.appendChild(div);
+    });
+  };
+  renderEvList(cobros,'cf-cobros','cf-in');
+  renderEvList(pagos,'cf-pagos','cf-out');
+}
+
+/* =================================================================
+   BENCHMARK
+   ================================================================= */
+function renderBenchmark(){
+  if(!state.calc) return;
+  // SONIDO
+  const sCont = document.getElementById('bench-sonido');
+  if(sCont){
+    sCont.innerHTML = '';
+    const sonidoItems = state.items.filter(x=>/sonido|line array|jbl|allegro|wharfedale/i.test(x.nombre));
+    const tuyo = sonidoItems.reduce((acc,it)=>{
+      if(it.propio){
+        return acc + (it.capex/it.vida);
+      }
+      return acc + toUSD((it.costo||0)*(it.cant||1)*(it.dias||1),it.moneda);
+    },0);
+    // Header
+    sCont.innerHTML += `
+      <div class="bench-row you">
+        <div><div class="bench-name">Tu Cotización · Centauro</div><div class="bench-tag">Sonido incluido en esta cotización</div></div>
+        <div class="bench-val">USD</div>
+        <div class="bench-val">$ ${formatNum(tuyo)}</div>
+        <div class="bench-val">—</div>
+        <div class="bench-val">BASE</div>
+      </div>
+    `;
+    BENCH.sonido.forEach(b=>{
+      const refUsd = b.moneda==='EUR' ? toUSD(b.total,'EUR') : b.total;
+      const delta = tuyo - refUsd;
+      const deltaPct = refUsd>0 ? (delta/refUsd)*100 : 0;
+      const cls = delta<=0 ? 'delta-pos' : 'delta-neg';
+      sCont.innerHTML += `
+        <div class="bench-row">
+          <div><div class="bench-name">${b.nombre}</div><div class="bench-tag">${b.nota}</div></div>
+          <div class="bench-val">${b.moneda}</div>
+          <div class="bench-val">${b.moneda} ${formatNum(b.total)}</div>
+          <div class="bench-val">$ ${formatNum(refUsd)}</div>
+          <div class="bench-val ${cls}">${delta>0?'+':''}${formatNum(deltaPct,1)}%</div>
+        </div>
+      `;
+    });
+  }
+  // PANTALLA
+  const pCont = document.getElementById('bench-pantalla');
+  if(pCont){
+    pCont.innerHTML='';
+    const pantallaItems = state.items.filter(x=>/led|pantalla/i.test(x.nombre));
+    const tuyoP = pantallaItems.reduce((acc,it)=>{
+      if(it.propio){return acc + (it.capex/it.vida);}
+      return acc + toUSD((it.costo||0)*(it.cant||1)*(it.dias||1),it.moneda);
+    },0);
+    pCont.innerHTML += `
+      <div class="bench-row you">
+        <div><div class="bench-name">Tu Cotización · Centauro</div><div class="bench-tag">Pantalla incluida en esta cotización</div></div>
+        <div class="bench-val">USD</div>
+        <div class="bench-val">$ ${formatNum(tuyoP)}</div>
+        <div class="bench-val">—</div>
+        <div class="bench-val">BASE</div>
+      </div>
+    `;
+    BENCH.pantalla.forEach(b=>{
+      const refUsd = b.moneda==='EUR' ? toUSD(b.total,'EUR') : b.total;
+      const delta = tuyoP - refUsd;
+      const deltaPct = refUsd>0?(delta/refUsd)*100:0;
+      const cls = delta<=0?'delta-pos':'delta-neg';
+      pCont.innerHTML += `
+        <div class="bench-row">
+          <div><div class="bench-name">${b.nombre}</div><div class="bench-tag">${b.nota}</div></div>
+          <div class="bench-val">${b.moneda}</div>
+          <div class="bench-val">${b.moneda} ${formatNum(b.total)}</div>
+          <div class="bench-val">$ ${formatNum(refUsd)}</div>
+          <div class="bench-val ${cls}">${delta>0?'+':''}${formatNum(deltaPct,1)}%</div>
+        </div>
+      `;
+    });
+  }
+}
+
+/* =================================================================
+   PERSISTENCIA
+   ================================================================= */
+function save(){
+  const snapshot = {
+    items: state.items,
+    lastTab: state.lastTab,
+    fields: {}
+  };
+  ['cli_razon','cli_rif','cli_contacto','cli_email','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','margen_pct','conv_eur','iva_pct','islr_pct','cobro_anticipo','pago_anticipo','fix_nomina','fix_oficina','fix_otros','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) snapshot.fields[id] = el.value;
+  });
+  ['iva_aplica','islr_aplica'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) snapshot.fields[id] = el.checked;
+  });
+  try{localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));}catch(e){}
+}
+function cargarEstado(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(s.items) state.items = s.items;
+    if(s.fields){
+      Object.entries(s.fields).forEach(([id,v])=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(el.type==='checkbox') el.checked = !!v;
+        else el.value = v;
+      });
+    }
+  }catch(e){console.warn('No se pudo cargar estado',e);}
+}
+function exportarJSON(){
+  const data = {items:state.items, fields:{}};
+  document.querySelectorAll('input[id],select[id]').forEach(el=>{
+    if(el.type==='checkbox') data.fields[el.id]=el.checked;
+    else data.fields[el.id]=el.value;
+  });
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Centauro_Cotizacion_${(document.getElementById('cli_razon').value||'cliente').replace(/\W+/g,'_')}_${Date.now()}.json`;
+  a.click();
+}
+function importarJSON(){document.getElementById('file-import').click();}
+function onImport(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(data.items) state.items = data.items;
+      if(data.fields){
+        Object.entries(data.fields).forEach(([id,v])=>{
+          const el = document.getElementById(id);
+          if(!el) return;
+          if(el.type==='checkbox') el.checked = !!v;
+          else el.value = v;
+        });
+      }
+      renderTabla();calcular();save();
+      alert('Cotización importada con éxito.');
+    }catch(e){alert('Archivo inválido.');}
+  };
+  reader.readAsText(file);
+}
+
+/* =================================================================
+   UTILS
+   ================================================================= */
+function setVal(id,v){const el=document.getElementById(id);if(el) el.textContent=v;}
+function formatNum(n,dec=2){
+  if(!isFinite(n)) return '0';
+  return n.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
+function formatMoney(n,cur){const sym=cur==='USD'?'$':cur==='EUR'?'€':'';return `${sym} ${formatNum(n)}`;}
+function formatDate(d){return d.toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'});}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+init();
+</script>
+
+</body>
+</html>
