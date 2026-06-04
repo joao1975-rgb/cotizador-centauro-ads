@@ -33,7 +33,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
 .hdr-meta{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .hdr-pill{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--text-1);display:flex;align-items:center;gap:8px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(16,185,129,0.2)}
-.tabs{display:flex;gap:4px;padding:4px;background:var(--bg-1);border:1px solid var(--border);border-radius:14px;margin-bottom:28px;overflow-x:auto}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--bg-1);border:1px solid var(--border);border-radius:14px;margin-bottom:28px;overflow-x:auto;position:sticky;top:0;z-index:40;backdrop-filter:blur(12px);background:rgba(19,9,31,0.92)}
 .tab{flex:1;min-width:fit-content;padding:12px 18px;background:transparent;border:none;color:var(--text-2);font-weight:600;font-size:13px;cursor:pointer;border-radius:10px;transition:all .25s ease;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
 .tab:hover{color:var(--text-0);background:var(--surface)}
 .tab.active{color:#fff;background:linear-gradient(135deg,var(--brand-purple) 0%,var(--brand-purple-deep) 100%);box-shadow:0 6px 20px rgba(139,63,183,0.35)}
@@ -201,11 +201,11 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
     <button class="tab active" data-tab="config"><span class="tab-icon">◐</span>Configuración</button>
     <button class="tab" data-tab="quote"><span class="tab-icon">◇</span>Cotizador</button>
     <button class="tab" data-tab="margen"><span class="tab-icon">◈</span>Margen / P&L</button>
+    <button class="tab" data-tab="presupuesto"><span class="tab-icon">◎</span>Presupuesto</button>
     <button class="tab" data-tab="buyrent"><span class="tab-icon">◆</span>Buy vs Rent</button>
     <button class="tab" data-tab="dashboard"><span class="tab-icon">◉</span>Dashboard KPIs</button>
     <button class="tab" data-tab="cashflow"><span class="tab-icon">◈</span>Flujo de Caja</button>
     <button class="tab" data-tab="bench"><span class="tab-icon">◊</span>Benchmark</button>
-    <button class="tab" data-tab="presupuesto"><span class="tab-icon">◎</span>Presupuesto</button>
   </nav>
 
   <!-- ============ PANEL: CONFIG ============ -->
@@ -947,16 +947,49 @@ function renderPL(){
   addRow('Diario <b>USD-BCV</b>',v3(col=>'$ '+fN(col.diarioBcv)),'pl-row-daily');
   addRow('Diario <b>EUR-BCV</b>',v3(col=>'€ '+fN(col.diarioEur)),'pl-row-daily');
 
-  // ---- INGRESOS BRUTOS + IMPUESTOS ----
+  // ---- INGRESOS BRUTOS + IMPUESTOS (con selección para presupuesto) ----
   const ivaPctVal=chk('iva_aplica')?num('iva_pct'):0;
   const ivaLbl=ivaPctVal>0?'IVA '+fN(ivaPctVal,0)+'%':'Sin IVA';
-  addRow('INGRESOS BRUTOS + IMPUESTOS',[],[],[],'',true);
-  addRow(`Ingreso Bruto <b>USD-BCV</b> <span style="font-size:10px;color:var(--text-2)">(${ivaLbl})</span>`,v3(col=>'$ '+fN(col.brutoBcv)),'pl-row-bruto');
-  addRow(`Ingreso Bruto <b>EUR-BCV</b> <span style="font-size:10px;color:var(--text-2)">(${ivaLbl})</span>`,v3(col=>'€ '+fN(col.brutoEur)),'pl-row-bruto');
-  addRow('Ingreso Bruto <b>USD-Paralelo</b> <span style="font-size:10px;color:var(--text-2)">(Sin IVA)</span>',v3(col=>'$ '+fN(col.brutoPar)),'pl-row-bruto');
+
+  // Header with "Presupuesto" column
+  const hdrTr=document.createElement('tr');
+  hdrTr.innerHTML=`<td colspan="4" style="padding:14px 16px;font-weight:700;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--brand-purple-light);background:var(--bg-2);border-top:2px solid var(--border)">INGRESOS BRUTOS + IMPUESTOS <span style="font-size:10px;color:var(--brand-orange-light);margin-left:12px">← Selecciona moneda y escenario para generar presupuesto</span></td>`;
+  tb.appendChild(hdrTr);
+
+  const selMon=state.presBudgetMoneda||'';
+  const selEsc=state.presBudgetEscenarios||[false,false,false];
+  const monedas=[
+    {key:'USD_BCV',label:'USD-BCV',ivaLabel:ivaLbl,vals:v3(col=>'$ '+fN(col.brutoBcv))},
+    {key:'EUR_BCV',label:'EUR-BCV',ivaLabel:ivaLbl,vals:v3(col=>'€ '+fN(col.brutoEur))},
+    {key:'USD_PARALELO',label:'USD-Paralelo',ivaLabel:'Sin IVA',vals:v3(col=>'$ '+fN(col.brutoPar))}
+  ];
+
+  monedas.forEach(mon=>{
+    const tr=document.createElement('tr');tr.className='pl-row-bruto';
+    const isSelected=selMon===mon.key;
+    const radioHtml=`<input type="radio" name="pres_moneda_sel" value="${mon.key}" ${isSelected?'checked':''} onchange="selectPresMoneda('${mon.key}')" style="accent-color:var(--brand-orange);width:16px;height:16px;cursor:pointer">`;
+
+    // Build cells: first cell has radio + label, then 3 value cells with optional escenario checkboxes
+    let cellsHtml=`<td style="padding:12px 16px"><div style="display:flex;align-items:center;gap:10px">${radioHtml}<span>Ingreso Bruto <b>${mon.label}</b> <span style="font-size:10px;color:var(--text-2)">(${mon.ivaLabel})</span></span></div></td>`;
+
+    cols.forEach((col,i)=>{
+      const chkHtml=isSelected?`<div style="margin-top:4px"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:10px;color:var(--brand-orange-light)"><input type="checkbox" ${selEsc[i]?'checked':''} onchange="selectPresEscenario(${i},this.checked)" style="accent-color:var(--brand-orange);width:14px;height:14px"> Esc.${i+1}</label></div>`:'';
+      cellsHtml+=`<td class="pl-val">${mon.vals[i]}${chkHtml}</td>`;
+    });
+    tr.innerHTML=cellsHtml;
+    tb.appendChild(tr);
+  });
 
   // Facturación en Bs
   addRow('Facturación en Bs',v3(col=>'Bs '+fN(col.brutoBcv*bcvUsd)),'');
+
+  // "Ir a Presupuesto" button if selection is complete
+  if(selMon && selEsc.some(x=>x)){
+    const escIdx=selEsc.findIndex(x=>x);
+    const btnTr=document.createElement('tr');
+    btnTr.innerHTML=`<td colspan="4" style="padding:16px;text-align:center"><button class="btn btn-accent" onclick="irAPresupuesto()" style="font-size:14px;padding:12px 24px">→ Generar Presupuesto (${selMon==='USD_BCV'?'USD-BCV':selMon==='EUR_BCV'?'EUR-BCV':'USD-Paralelo'} · Escenario ${escIdx+1})</button></td>`;
+    tb.appendChild(btnTr);
+  }
 }
 
 /* ============ DASHBOARD ============ */
@@ -1107,6 +1140,31 @@ function validarTelefono(el){
   const valid=v.length===7&&/^\d{7}$/.test(v);
   hint.textContent=valid?'✓ Teléfono válido':`✗ Debe tener 7 dígitos (tiene ${v.length})`;
   hint.style.color=valid?'var(--success)':'var(--danger)';
+}
+
+/* ============ P&L → PRESUPUESTO SELECTION ============ */
+if(!state.presBudgetMoneda) state.presBudgetMoneda='';
+if(!state.presBudgetEscenarios) state.presBudgetEscenarios=[false,false,false];
+
+function selectPresMoneda(key){
+  state.presBudgetMoneda=key;
+  state.presBudgetEscenarios=[false,false,false]; // reset escenarios on moneda change
+  save();renderPL();
+}
+function selectPresEscenario(idx,val){
+  // Only one escenario at a time
+  state.presBudgetEscenarios=[false,false,false];
+  state.presBudgetEscenarios[idx]=val;
+  save();renderPL();
+}
+function irAPresupuesto(){
+  // Sync selection to presupuesto selectors
+  const mon=state.presBudgetMoneda;
+  const escIdx=state.presBudgetEscenarios.findIndex(x=>x);
+  if(mon) document.getElementById('pres_moneda').value=mon;
+  if(escIdx>=0) document.getElementById('pres_escenario').value=String(escIdx);
+  save();
+  switchTab('presupuesto');
 }
 
 /* ============ PRESUPUESTO ============ */
