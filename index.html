@@ -205,6 +205,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
     <button class="tab" data-tab="dashboard"><span class="tab-icon">◉</span>Dashboard KPIs</button>
     <button class="tab" data-tab="cashflow"><span class="tab-icon">◈</span>Flujo de Caja</button>
     <button class="tab" data-tab="bench"><span class="tab-icon">◊</span>Benchmark</button>
+    <button class="tab" data-tab="presupuesto"><span class="tab-icon">◎</span>Presupuesto</button>
   </nav>
 
   <!-- ============ PANEL: CONFIG ============ -->
@@ -215,8 +216,18 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
         <div class="grid grid-2">
           <div class="field"><label class="field-label">Razón Social Cliente</label><input class="input" id="cli_razon" placeholder="Ej. Empresa Patrocinante C.A." onchange="save()"></div>
           <div class="field"><label class="field-label">RIF</label><input class="input" id="cli_rif" placeholder="J-12345678-9" onchange="save()"></div>
+          <div class="field" style="grid-column:span 2"><label class="field-label">Dirección</label><input class="input" id="cli_direccion" placeholder="Av. Principal, Edif. Centro, Piso 3, Caracas" maxlength="100" onchange="save()"><span class="field-hint">Máximo 100 caracteres</span></div>
           <div class="field"><label class="field-label">Contacto</label><input class="input" id="cli_contacto" placeholder="Nombre · Cargo" onchange="save()"></div>
-          <div class="field"><label class="field-label">Email / Teléfono</label><input class="input" id="cli_email" placeholder="contacto@empresa.com" onchange="save()"></div>
+          <div class="field"><label class="field-label">Email</label><input class="input" type="email" id="cli_email" placeholder="contacto@empresa.com" onchange="validarEmail(this);save()" oninput="validarEmail(this)"><span class="field-hint" id="cli_email_hint"></span></div>
+          <div class="field"><label class="field-label">Teléfono</label>
+            <div style="display:flex;gap:6px">
+              <select class="select" id="cli_tel_prefix" style="width:110px;flex-shrink:0" onchange="save()">
+                <option value="0412">0412/0422</option><option value="0414">0414/0424</option><option value="0416">0416/0426</option>
+              </select>
+              <input class="input" id="cli_tel_num" placeholder="1234567" maxlength="7" pattern="[0-9]{7}" oninput="validarTelefono(this);save()" onchange="validarTelefono(this);save()">
+            </div>
+            <span class="field-hint" id="cli_tel_hint"></span>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -424,6 +435,81 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
       <div class="sup-card"><div class="sup-name">Allegro · Musical Country C.A. <span class="sup-source">USD · IVA 16%</span></div><div class="sup-bd">Wharfedale SHO 2x15 PRO + Power Top TRX600 + Consola Yamaha 10C + cables + micrófono. CAPEX único.</div><div class="sup-amount">$16.047,86 <span style="font-size:12px;color:var(--text-2)">(+IVA)</span></div></div>
     </div>
   </section>
+
+  <!-- ============ PANEL: PRESUPUESTO ============ -->
+  <section class="panel" id="panel-presupuesto">
+    <div class="section-title">Generador de Presupuesto al Cliente</div>
+    <div class="section-subtitle">Selecciona moneda y margen en la pestaña <b>Margen/P&L</b> (sección Ingresos Brutos). Aquí se arma el presupuesto detallado con prorrateo de costos no visibles al cliente.</div>
+
+    <!-- Selección de moneda y margen -->
+    <div class="grid grid-3" style="margin-bottom:20px">
+      <div class="card card-hi">
+        <div class="field"><label class="field-label">Moneda del Presupuesto</label>
+          <select class="select" id="pres_moneda" onchange="save();renderPresupuesto()">
+            <option value="USD_BCV">USD / BCV</option><option value="EUR_BCV">EUR / BCV</option><option value="USD_PARALELO">USD / Paralelo</option>
+          </select>
+        </div>
+      </div>
+      <div class="card card-hi">
+        <div class="field"><label class="field-label">Escenario de Margen</label>
+          <select class="select" id="pres_escenario" onchange="save();renderPresupuesto()">
+            <option value="0">Escenario 1</option><option value="1">Escenario 2</option><option value="2">Escenario 3</option>
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <button class="btn btn-accent" onclick="exportPresupuestoPDF()">⎙ Exportar PDF</button>
+          <button class="btn btn-primary" onclick="exportPresupuestoExcel()">⬇ Exportar Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos del cliente (mirror de config) -->
+    <div class="card" style="margin-bottom:20px;padding:18px 22px" id="pres-cliente-header"></div>
+
+    <!-- Tabla de trabajo del presupuesto -->
+    <div class="table-wrap" style="margin-bottom:24px">
+      <div class="table-toolbar"><span style="font-size:13px;font-weight:600">Detalle de Costos y Presupuesto</span><span class="txt-muted" id="pres-moneda-label" style="font-size:12px">Moneda: —</span></div>
+      <div style="overflow-x:auto">
+        <table class="table" id="tbl-pres">
+          <thead><tr>
+            <th style="min-width:200px">Descripción</th>
+            <th>Moneda Orig.</th>
+            <th>Monto Orig.</th>
+            <th>USD-Paralelo</th>
+            <th id="th-pres-mon">Presupuesto</th>
+            <th style="text-align:center">Visible</th>
+            <th>Costo/Prorratear</th>
+            <th id="th-pres-adj">Pres. Ajustado</th>
+            <th id="th-ganancia">Ganancia</th>
+            <th id="th-pres-final">Pres. Final</th>
+            <th>Días</th>
+            <th>Pres. Diario</th>
+          </tr></thead>
+          <tbody id="tbody-pres"></tbody>
+          <tfoot id="tfoot-pres"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Presupuesto Cliente (formato cotización) -->
+    <div class="section-title">Vista Presupuesto al Cliente</div>
+    <div class="table-wrap" id="pres-cliente-wrap">
+      <div class="table-toolbar" style="background:linear-gradient(135deg,rgba(139,63,183,0.15),rgba(245,158,11,0.08))">
+        <span style="font-size:14px;font-weight:700" id="pres-cli-title">COTIZACIÓN</span>
+        <span class="mono" style="font-size:12px;color:var(--text-2)" id="pres-cli-num"></span>
+      </div>
+      <div style="padding:16px 20px;font-size:13px;color:var(--text-1);line-height:1.7" id="pres-cli-datos"></div>
+      <div style="overflow-x:auto">
+        <table class="table" id="tbl-pres-cli">
+          <thead><tr><th style="min-width:240px">Descripción</th><th>Costo Unitario</th><th>Días</th><th>Cantidad</th><th>Total</th></tr></thead>
+          <tbody id="tbody-pres-cli"></tbody>
+          <tfoot><tr style="background:var(--bg-2)"><td colspan="4" style="padding:12px 16px;font-weight:800;text-align:right">TOTAL</td><td class="mono" style="padding:12px 16px;font-weight:800;text-align:right" id="pres-cli-total">0</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- STICKY FOOTER -->
@@ -522,7 +608,7 @@ function switchTab(n){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===n));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
   state.lastTab=n;save();
-  if(n==='margen')renderPL();if(n==='dashboard')renderDashboard();if(n==='buyrent')renderBuyRent();if(n==='cashflow')renderCashflow();if(n==='bench')renderBenchmark();
+  if(n==='margen')renderPL();if(n==='dashboard')renderDashboard();if(n==='buyrent')renderBuyRent();if(n==='cashflow')renderCashflow();if(n==='bench')renderBenchmark();if(n==='presupuesto')renderPresupuesto();
 }
 
 /* ============ FIXED COSTS TABLE ============ */
@@ -981,14 +1067,14 @@ function renderBenchmark(){
 
 /* ============ PERSISTENCE ============ */
 function save(){
-  const snap={items:state.items,fixedCosts:state.fixedCosts,lastTab:state.lastTab,fields:{}};
-  ['cli_razon','cli_rif','cli_contacto','cli_email','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','mg_pct_1','mg_pct_2','mg_pct_3','ing_dia_1','ing_dia_2','ing_dia_3'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
+  const snap={items:state.items,fixedCosts:state.fixedCosts,lastTab:state.lastTab,presChecks:state.presChecks||{},diasPresOverrides:state.diasPresOverrides||{},fields:{}};
+  ['cli_razon','cli_rif','cli_direccion','cli_contacto','cli_email','cli_tel_num','cli_tel_prefix','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','mg_pct_1','mg_pct_2','mg_pct_3','ing_dia_1','ing_dia_2','ing_dia_3','pres_moneda','pres_escenario'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
   ['iva_aplica','islr_aplica'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.checked;});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(snap));}catch(e){}
 }
 function cargarEstado(){
   try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;const s=JSON.parse(raw);
-    if(s.items)state.items=s.items;if(s.fixedCosts)state.fixedCosts=s.fixedCosts;
+    if(s.items)state.items=s.items;if(s.fixedCosts)state.fixedCosts=s.fixedCosts;if(s.presChecks)state.presChecks=s.presChecks;if(s.diasPresOverrides)state.diasPresOverrides=s.diasPresOverrides;
     if(s.fields)Object.entries(s.fields).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
   }catch(e){console.warn(e);}
 }
@@ -1005,6 +1091,188 @@ function setVal(id,v){const el=document.getElementById(id);if(el)el.textContent=
 function fN(n,d=2){if(!isFinite(n))return'0';return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function fD(d){return d.toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'});}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ============ VALIDATIONS ============ */
+function validarEmail(el){
+  const v=el.value.trim();const hint=document.getElementById('cli_email_hint');
+  if(!v){hint.textContent='';hint.style.color='';return;}
+  const valid=/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(v);
+  hint.textContent=valid?'✓ Email válido':'✗ Email inválido (requiere @dominio.ext)';
+  hint.style.color=valid?'var(--success)':'var(--danger)';
+}
+function validarTelefono(el){
+  const v=el.value.replace(/\D/g,'');el.value=v.substring(0,7);
+  const hint=document.getElementById('cli_tel_hint');
+  if(!v){hint.textContent='';hint.style.color='';return;}
+  const valid=v.length===7&&/^\d{7}$/.test(v);
+  hint.textContent=valid?'✓ Teléfono válido':`✗ Debe tener 7 dígitos (tiene ${v.length})`;
+  hint.style.color=valid?'var(--success)':'var(--danger)';
+}
+
+/* ============ PRESUPUESTO ============ */
+// State for budget visibility checks
+if(!state.presChecks) state.presChecks={};
+
+function getPresMonedaTC(moneda){
+  const par=num('tasa_paralelo'),bcvU=num('tasa_bcv_usd'),bcvE=num('tasa_bcv_eur');
+  if(moneda==='USD_BCV') return {tc:bcvU,sym:'$',label:'USD-BCV'};
+  if(moneda==='EUR_BCV') return {tc:bcvE,sym:'€',label:'EUR-BCV'};
+  return {tc:par,sym:'$',label:'USD-Paralelo'};
+}
+function toPresMoneda(usdPar,moneda){
+  const par=num('tasa_paralelo');const m=getPresMonedaTC(moneda);
+  return m.tc>0?usdPar*par/m.tc:usdPar;
+}
+
+function renderPresupuesto(){
+  if(!state.calc||!state.calc.cols) return;
+  const moneda=document.getElementById('pres_moneda').value;
+  const escIdx=parseInt(document.getElementById('pres_escenario').value)||0;
+  const col=state.calc.cols[escIdx]||state.calc.cols[0];
+  const m=getPresMonedaTC(moneda);
+  const diasGlobal=num('evento_dias')||34;
+  const mgPct=col.mg;
+
+  document.getElementById('pres-moneda-label').textContent='Moneda: '+m.label+' · MB: '+fN(mgPct,1)+'%';
+  document.getElementById('th-pres-mon').textContent='Presupuesto ('+m.label+')';
+  document.getElementById('th-pres-adj').textContent='Pres. Ajustado ('+m.label+')';
+  document.getElementById('th-ganancia').textContent='Ganancia ('+fN(mgPct,1)+'%)';
+  document.getElementById('th-pres-final').textContent='Pres. Final ('+m.label+')';
+
+  // Build items: fixed costs + variable costs
+  const items=[];
+  state.fixedCosts.forEach(fc=>{
+    if(fc.pctImput===undefined)fc.pctImput=100;
+    const imp=fc.monto*(fc.pctImput/100);
+    const usdPar=fixedToUSDParalelo(imp,fc.moneda);
+    items.push({id:'f_'+fc.id,desc:fc.concepto,monOrig:MONEDA_FIJO_LABELS[fc.moneda],montoOrig:imp,usdPar,tipo:'fijo'});
+  });
+  state.items.forEach(it=>{
+    let monOrig=MONEDA_ITEM_LABELS[it.moneda]||it.moneda;
+    let montoOrig,usdPar;
+    if(it.propio&&it.capex>0&&it.vida>0){
+      const am=it.capex/it.vida;const mt=(it.capex*(num('br_mant_pct')/100))/(num('br_eventos_anio')||1);
+      montoOrig=am+mt;usdPar=montoOrig;monOrig='USD (Amort.)';
+    } else {
+      montoOrig=(it.costo||0)*(it.cant||0)*(it.dias||0);
+      usdPar=itemToUSDParalelo(montoOrig,it.moneda);
+    }
+    items.push({id:'v_'+it.id,desc:it.nombre,monOrig,montoOrig,usdPar,tipo:'variable',dias:it.dias,cant:it.cant});
+  });
+
+  // Checks (visible or not)
+  items.forEach(it=>{if(state.presChecks[it.id]===undefined)state.presChecks[it.id]=true;});
+
+  // Calculate presupuesto in selected currency
+  items.forEach(it=>{it.presMon=toPresMoneda(it.usdPar,moneda);it.checked=!!state.presChecks[it.id];});
+
+  // Prorrateo: sum unchecked, distribute proportionally to checked
+  const totalChecked=items.filter(x=>x.checked).reduce((a,x)=>a+x.presMon,0);
+  const totalUnchecked=items.filter(x=>!x.checked).reduce((a,x)=>a+x.presMon,0);
+  items.forEach(it=>{
+    if(it.checked&&totalChecked>0){it.prorrateo=totalUnchecked*(it.presMon/totalChecked);}
+    else{it.prorrateo=0;}
+    it.presAjustado=it.checked?it.presMon+it.prorrateo:0;
+    // Ganancia: Pres. Final = Pres. Ajustado / (1 - MB%), Ganancia = Final - Ajustado
+    it.presFinal=it.checked&&mgPct<100?it.presAjustado/(1-mgPct/100):it.presAjustado;
+    it.ganancia=it.presFinal-it.presAjustado;
+    it.diasPres=(state.diasPresOverrides&&state.diasPresOverrides[it.id])||diasGlobal;
+    it.presDiario=it.diasPres>0?it.presAjustado/it.diasPres:0;
+  });
+
+  // Render table
+  const tb=document.getElementById('tbody-pres');tb.innerHTML='';
+  items.forEach(it=>{
+    const tr=document.createElement('tr');
+    if(!it.checked)tr.style.opacity='.5';
+    tr.innerHTML=`
+      <td style="font-weight:600">${esc(it.desc)} <span style="font-size:10px;color:var(--text-3)">${it.tipo}</span></td>
+      <td style="font-size:12px">${it.monOrig}</td>
+      <td class="mono" style="text-align:right">${fN(it.montoOrig)}</td>
+      <td class="mono" style="text-align:right">$ ${fN(it.usdPar)}</td>
+      <td class="mono" style="text-align:right">${m.sym} ${fN(it.presMon)}</td>
+      <td style="text-align:center"><label class="toggle"><input type="checkbox" ${it.checked?'checked':''} onchange="togglePresCheck('${it.id}',this.checked)"><span class="toggle-slider"></span></label></td>
+      <td class="mono" style="text-align:right;color:var(--warning)">${it.checked?m.sym+' '+fN(it.prorrateo):'—'}</td>
+      <td class="mono" style="text-align:right;font-weight:700">${it.checked?m.sym+' '+fN(it.presAjustado):'—'}</td>
+      <td class="mono" style="text-align:right;color:#34D399">${it.checked?m.sym+' '+fN(it.ganancia):'—'}</td>
+      <td class="mono" style="text-align:right;font-weight:800;color:var(--brand-orange-light)">${it.checked?m.sym+' '+fN(it.presFinal):'—'}</td>
+      <td><input class="input mono" type="number" value="${it.diasPres}" style="width:60px" onchange="setDiasPres('${it.id}',this.value)" ${it.checked?'':'disabled'}></td>
+      <td class="mono" style="text-align:right">${it.checked?m.sym+' '+fN(it.presDiario):'—'}</td>`;
+    tb.appendChild(tr);
+  });
+
+  // Totals
+  const totals=items.filter(x=>x.checked);
+  const tf=document.getElementById('tfoot-pres');tf.innerHTML=`<tr style="background:var(--bg-2)">
+    <td colspan="3" style="font-weight:700;text-align:right;padding:12px">TOTALES</td>
+    <td class="mono" style="text-align:right;font-weight:700;padding:12px">$ ${fN(totals.reduce((a,x)=>a+x.usdPar,0))}</td>
+    <td class="mono" style="text-align:right;font-weight:700;padding:12px">${m.sym} ${fN(totals.reduce((a,x)=>a+x.presMon,0))}</td>
+    <td></td>
+    <td class="mono" style="text-align:right;font-weight:700;padding:12px;color:var(--warning)">${m.sym} ${fN(totalUnchecked>0?totalUnchecked:0)}</td>
+    <td class="mono" style="text-align:right;font-weight:700;padding:12px">${m.sym} ${fN(totals.reduce((a,x)=>a+x.presAjustado,0))}</td>
+    <td class="mono" style="text-align:right;font-weight:700;padding:12px;color:#34D399">${m.sym} ${fN(totals.reduce((a,x)=>a+x.ganancia,0))}</td>
+    <td class="mono" style="text-align:right;font-weight:800;padding:12px;color:var(--brand-orange-light)">${m.sym} ${fN(totals.reduce((a,x)=>a+x.presFinal,0))}</td>
+    <td colspan="2"></td></tr>`;
+
+  // Client header
+  const ch=document.getElementById('pres-cliente-header');
+  ch.innerHTML=`<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div><b>${esc(document.getElementById('cli_razon').value||'Cliente')}</b><br>
+    <span style="color:var(--text-2);font-size:12px">RIF: ${esc(document.getElementById('cli_rif').value||'—')} · ${esc(document.getElementById('cli_direccion').value||'—')}</span></div>
+    <div style="text-align:right"><span style="font-size:12px;color:var(--text-2)">Contacto: ${esc(document.getElementById('cli_contacto').value||'—')}</span><br>
+    <span style="font-size:12px;color:var(--text-2)">${esc(document.getElementById('cli_email').value||'')} · ${document.getElementById('cli_tel_prefix').value}-${document.getElementById('cli_tel_num').value||'0000000'}</span></div></div>`;
+
+  // Client-facing budget
+  document.getElementById('pres-cli-title').textContent='COTIZACIÓN · '+esc(document.getElementById('ev_nombre').value);
+  document.getElementById('pres-cli-num').textContent=document.getElementById('ev_num').value||'';
+  document.getElementById('pres-cli-datos').innerHTML=`<b>${esc(document.getElementById('cli_razon').value)}</b> · RIF: ${esc(document.getElementById('cli_rif').value)}<br>${esc(document.getElementById('cli_direccion').value)}<br>Attn: ${esc(document.getElementById('cli_contacto').value)} · ${esc(document.getElementById('cli_email').value)}<br>Evento: <b>${esc(document.getElementById('ev_nombre').value)}</b> · ${document.getElementById('ev_inicio').value} al ${document.getElementById('ev_fin').value} · ${esc(document.getElementById('ev_locaciones').value)}`;
+
+  const cliTb=document.getElementById('tbody-pres-cli');cliTb.innerHTML='';
+  let cliTotal=0;
+  totals.forEach(it=>{
+    const dias=it.diasPres||1;const unitario=it.presFinal/Math.max(dias,1);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:600">${esc(it.desc)}</td><td class="mono" style="text-align:right">${m.sym} ${fN(unitario)}</td><td class="mono" style="text-align:center">${dias}</td><td class="mono" style="text-align:center">1</td><td class="mono" style="text-align:right;font-weight:700">${m.sym} ${fN(it.presFinal)}</td>`;
+    cliTb.appendChild(tr);cliTotal+=it.presFinal;
+  });
+  document.getElementById('pres-cli-total').textContent=m.sym+' '+fN(cliTotal);
+}
+
+function togglePresCheck(id,val){state.presChecks[id]=val;save();renderPresupuesto();}
+function setDiasPres(id,val){
+  // Store override per item
+  if(!state.diasPresOverrides) state.diasPresOverrides={};
+  state.diasPresOverrides[id]=parseInt(val)||1;save();renderPresupuesto();
+}
+
+/* ============ EXPORT PDF ============ */
+function exportPresupuestoPDF(){
+  const el=document.getElementById('pres-cliente-wrap');
+  const orig=document.body.innerHTML;
+  document.body.innerHTML=el.outerHTML;
+  document.body.style.background='#fff';document.body.style.color='#000';
+  window.print();
+  document.body.innerHTML=orig;document.body.style.background='';document.body.style.color='';
+  location.reload();
+}
+
+/* ============ EXPORT EXCEL ============ */
+function exportPresupuestoExcel(){
+  const moneda=document.getElementById('pres_moneda').value;
+  const m=getPresMonedaTC(moneda);
+  let csv='Descripción,Costo Unitario,Días,Cantidad,Total\n';
+  document.querySelectorAll('#tbody-pres-cli tr').forEach(tr=>{
+    const cells=tr.querySelectorAll('td');
+    const vals=Array.from(cells).map(c=>'"'+c.textContent.trim().replace(/"/g,'""')+'"');
+    csv+=vals.join(',')+'\n';
+  });
+  const totalEl=document.getElementById('pres-cli-total');
+  csv+='TOTAL,,,,'+totalEl.textContent+'\n';
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`Presupuesto_${(document.getElementById('cli_razon').value||'cliente').replace(/\W+/g,'_')}_${Date.now()}.csv`;
+  a.click();
+}
 
 init();
 </script>
