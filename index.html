@@ -277,13 +277,35 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
       <!-- Anticipo proveedor fijo al 50% según términos contractuales -->
     </div>
 
-    <!-- COSTOS FIJOS — ahora como tabla dinámica con moneda -->
+    <!-- CENTAURO ADS — datos propios editables -->
+    <div class="section-title" style="margin-top:8px">Centauro ADS · Datos Propios</div>
+    <div class="section-subtitle">Información de Centauro ADS que aparece en los presupuestos emitidos. Editable.</div>
+    <div class="grid grid-2" style="margin-bottom:8px">
+      <div class="card">
+        <div class="grid grid-2">
+          <div class="field"><label class="field-label">Razón Social</label><input class="input" id="cads_razon" value="Centauro Marketing Solutions C.A." onchange="save()"></div>
+          <div class="field"><label class="field-label">RIF</label><input class="input" id="cads_rif" value="J-507396797" onchange="save()"></div>
+          <div class="field" style="grid-column:span 2"><label class="field-label">Domicilio Fiscal / Dirección</label><input class="input" id="cads_direccion" value="AV Carabobo QT Alberlicem, Urb. El Bosque, Caracas" maxlength="120" onchange="save()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid grid-2">
+          <div class="field"><label class="field-label">Contacto Comercial</label><input class="input" id="cads_contacto" value="Mercadeo Centauro ADS" onchange="save()"></div>
+          <div class="field"><label class="field-label">Teléfono</label><input class="input" id="cads_telefono" value="0424-2644335" onchange="save()"></div>
+          <div class="field" style="grid-column:span 2"><label class="field-label">Email</label><input class="input" type="email" id="cads_email" value="mercadeo@centauroads.com" onchange="save()"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL: QUOTE ============ -->
+  <section class="panel" id="panel-quote">
     <div class="section-title">Costos Fijos Mensuales</div>
-    <div class="section-subtitle">Costos que Centauro asume independientemente del evento. El <b>% Imputación</b> define qué proporción del gasto mensual se carga al proyecto. El <b>Costo Proyecto (USD-Paralelo)</b> convierte el imputado a USD usando la tasa de la moneda seleccionada y dividiendo entre la tasa USD Paralelo.</div>
-    <div class="table-wrap" style="margin-bottom:8px">
+    <div class="section-subtitle">Costos que Centauro asume independientemente del evento. <b>% Imputación</b> define la porción cargada al proyecto. <b>Costo Proyecto (USD-Paralelo)</b> = Imputado × TC_moneda / TC_paralelo.</div>
+    <div class="table-wrap" style="margin-bottom:24px">
       <div class="table-toolbar">
         <div class="table-toolbar-left"><button class="btn btn-primary btn-sm" onclick="addFixedCost()">+ Agregar Concepto</button></div>
-        <div style="font-size:12px;color:var(--text-2)">Imputado = Monto × % Imputación · Costo Proyecto = Imputado convertido a USD Paralelo</div>
+        <div style="font-size:12px;color:var(--text-2)">Imputado = Monto × % Imputación · USD-Paralelo = Imputado × TC / TC_paralelo</div>
       </div>
       <div style="overflow-x:auto">
         <table class="table" id="tbl-fixed">
@@ -293,10 +315,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
         </table>
       </div>
     </div>
-  </section>
 
-  <!-- ============ PANEL: QUOTE ============ -->
-  <section class="panel" id="panel-quote">
     <div class="section-title">Cotizador de Rubros (Costos Variables)</div>
     <div class="section-subtitle">Cada línea contribuye al costo variable. Marca "Propio" si Centauro aporta el equipo: el sistema imputará la amortización por evento.</div>
     <div class="table-wrap">
@@ -321,6 +340,32 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
       <div class="card"><div class="section-title" style="margin-bottom:8px">Por Categoría</div><div id="cat-breakdown" style="display:flex;flex-direction:column;gap:10px"></div></div>
       <div class="card card-hi"><div class="section-title" style="margin-bottom:8px">Costo Variable Total (USD-Paralelo)</div><div class="kpi-value txt-brand" id="q_costo_base">$ 0.00</div><div class="kpi-sub">Suma columna Costo (USD-Paralelo)</div></div>
       <div class="card"><div class="section-title" style="margin-bottom:8px">Costo por Día (USD-Paralelo)</div><div class="kpi-value mono" id="q_costo_dia">$ 0.00</div><div class="kpi-sub">Costo Variable Total / Días evento</div></div>
+    </div>
+
+    <!-- OTROS COSTOS -->
+    <div class="section-title" style="margin-top:32px">Otros Costos</div>
+    <div class="section-subtitle">Costos adicionales no categorizados como variables ni fijos. Se suman al total del proyecto. Misma estructura y lógica que los costos variables.</div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="table-toolbar-left">
+          <button class="btn btn-primary btn-sm" onclick="openCatalogOther()">+ Catálogo</button>
+          <button class="btn btn-ghost btn-sm" onclick="agregarFilaOther()">+ Línea en blanco</button>
+        </div>
+        <div class="table-toolbar-left">
+          <button class="btn btn-ghost btn-sm" onclick="duplicarSeleccionOther()">⎘ Duplicar última</button>
+          <button class="btn btn-danger btn-sm" onclick="limpiarTablaOther()">⌫ Vaciar</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="table" id="tbl-other">
+          <thead><tr><th style="min-width:240px">Concepto</th><th>Categoría</th><th>Moneda</th><th>Cant.</th><th>Días</th><th>Propio</th><th style="min-width:120px">CAPEX</th><th>Vida·Ev</th><th>Total</th><th>Costo (USD-Paralelo)</th><th></th></tr></thead>
+          <tbody id="tbody-other"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card card-hi"><div class="section-title" style="margin-bottom:8px">Otros Costos Total (USD-Paralelo)</div><div class="kpi-value txt-brand" id="q_otros_base">$ 0.00</div><div class="kpi-sub">Suma columna Costo (USD-Paralelo)</div></div>
+      <div class="card"><div class="section-title" style="margin-bottom:8px">Costo Total Proyecto (Fijos + Variables + Otros)</div><div class="kpi-value mono" id="q_total_proyecto">$ 0.00</div><div class="kpi-sub">Fijos + Variables + Otros · USD-Paralelo</div></div>
     </div>
   </section>
 
@@ -599,7 +644,8 @@ function init(){
       {id:crypto.randomUUID(),concepto:'Marketing + Otros',monto:500,moneda:'USD_PARALELO'}
     ];
   }
-  renderTabla();renderFixedCosts();recalcDias();
+  if(!state.otherItems) state.otherItems=[];
+  renderTabla();renderFixedCosts();renderTablaOther();recalcDias();
   calcular();
 }
 
@@ -705,6 +751,50 @@ function updateItem(id,inp){
   save();calcular();
 }
 function agregarFila(){state.items.push({id:crypto.randomUUID(),nombre:'Nuevo rubro',cat:'Infraestructura',moneda:'USD_PARALELO',costo:0,cant:1,dias:1,propio:false,capex:0,vida:60});renderTabla();save();calcular();}
+
+/* ============ OTROS COSTOS ============ */
+function renderTablaOther(){
+  const tb=document.getElementById('tbody-other');if(!tb)return;tb.innerHTML='';
+  (state.otherItems||[]).forEach(it=>{
+    const tr=document.createElement('tr');tr.dataset.id=it.id;
+    const capexDisabled=!it.propio;const capexVal=it.propio?it.capex:'';
+    tr.innerHTML=`
+      <td><input class="input" data-f="nombre" value="${esc(it.nombre)}"></td>
+      <td><select class="select" data-f="cat">${CAT_OPTS.map(c=>`<option ${c===it.cat?'selected':''}>${c}</option>`).join('')}</select></td>
+      <td><select class="select" data-f="moneda">${MONEDAS.map(m=>`<option value="${m}" ${m===it.moneda?'selected':''}>${MONEDA_ITEM_LABELS[m]||m}</option>`).join('')}</select></td>
+      <td><input class="input mono" type="number" data-f="cant" value="${it.cant}" style="max-width:70px"></td>
+      <td><input class="input mono" type="number" data-f="dias" value="${it.dias}" style="min-width:70px"></td>
+      <td style="text-align:center"><label class="toggle"><input type="checkbox" data-f="propio" ${it.propio?'checked':''}><span class="toggle-slider"></span></label></td>
+      <td><input class="input mono" type="number" data-f="capex" value="${capexVal}" placeholder="0" style="min-width:100px" ${capexDisabled?'disabled style="opacity:.35;min-width:100px"':''}></td>
+      <td><input class="input mono" type="number" data-f="vida" value="${it.vida}" style="max-width:70px" ${capexDisabled?'disabled style="opacity:.35"':''}></td>
+      <td class="mono" data-r="total" style="font-weight:600;text-align:right">0</td>
+      <td class="mono" data-r="costpar" style="font-weight:700;text-align:right;color:#FBBF24">$ 0</td>
+      <td><button class="btn btn-danger btn-icon" onclick="eliminarFilaOther('${it.id}')">✕</button></td>`;
+    tr.querySelectorAll('[data-f]').forEach(inp=>{
+      inp.addEventListener('input',()=>updateItemOther(it.id,inp));
+      inp.addEventListener('change',()=>updateItemOther(it.id,inp));
+    });
+    tb.appendChild(tr);
+  });
+}
+function updateItemOther(id,inp){
+  const it=(state.otherItems||[]).find(x=>x.id===id);if(!it)return;
+  const f=inp.dataset.f;
+  if(inp.type==='checkbox'){it[f]=inp.checked;renderTablaOther();}
+  else if(inp.type==='number') it[f]=parseFloat(inp.value)||0;
+  else if(inp.tagName==='SELECT') it[f]=inp.value;
+  else it[f]=inp.value;
+  save();calcular();
+}
+function agregarFilaOther(){if(!state.otherItems)state.otherItems=[];state.otherItems.push({id:crypto.randomUUID(),nombre:'Otro costo',cat:'Agencia',moneda:'USD_PARALELO',costo:0,cant:1,dias:1,propio:false,capex:0,vida:60});renderTablaOther();save();calcular();}
+function eliminarFilaOther(id){state.otherItems=(state.otherItems||[]).filter(x=>x.id!==id);renderTablaOther();save();calcular();}
+function duplicarSeleccionOther(){if(!(state.otherItems||[]).length)return;state.otherItems.push({...state.otherItems[state.otherItems.length-1],id:crypto.randomUUID()});renderTablaOther();save();calcular();}
+function limpiarTablaOther(){if(!confirm('¿Vaciar Otros Costos?'))return;state.otherItems=[];renderTablaOther();save();calcular();}
+function openCatalogOther(){
+  window._catalogTarget='other';
+  openCatalog();
+}
+
 function eliminarFila(id){state.items=state.items.filter(x=>x.id!==id);renderTabla();save();calcular();}
 function duplicarSeleccion(){if(!state.items.length)return;state.items.push({...state.items[state.items.length-1],id:crypto.randomUUID()});renderTabla();save();calcular();}
 function limpiarTabla(){if(!confirm('¿Vaciar?'))return;state.items=[];renderTabla();save();calcular();}
@@ -712,11 +802,18 @@ function recalcDias(){const d=parseFloat(document.getElementById('evento_dias').
 
 /* ============ CATALOG ============ */
 function openCatalog(){
+  if(!window._catalogTarget) window._catalogTarget='main';
   const c=document.getElementById('catalog-list');c.innerHTML='';
-  CATALOG.forEach(g=>{const d=document.createElement('div');d.className='catalog-group';d.innerHTML=`<div class="catalog-group-title">${g.grupo}</div>`;g.items.forEach(it=>{const i=document.createElement('div');i.className='catalog-item';const p=it.propio?`CAPEX $${fN(it.capex)}`:`${it.moneda==='EUR'?'€':'$'} ${fN(it.costo)}/día`;i.innerHTML=`<div><div class="catalog-name">${it.nombre}</div><div class="catalog-desc">${it.cat} · ${it.desc||''}</div></div><div class="catalog-price">${p}</div>`;i.onclick=()=>{state.items.push(buildItem(it));renderTabla();save();calcular();closeCatalog();};d.appendChild(i);});c.appendChild(d);});
+  CATALOG.forEach(g=>{const d=document.createElement('div');d.className='catalog-group';d.innerHTML=`<div class="catalog-group-title">${g.grupo}</div>`;g.items.forEach(it=>{const i=document.createElement('div');i.className='catalog-item';const p=it.propio?`CAPEX $${fN(it.capex)}`:`${it.moneda==='EUR'?'€':'$'} ${fN(it.costo)}/día`;i.innerHTML=`<div><div class="catalog-name">${it.nombre}</div><div class="catalog-desc">${it.cat} · ${it.desc||''}</div></div><div class="catalog-price">${p}</div>`;
+    i.onclick=()=>{
+      if(window._catalogTarget==='other'){if(!state.otherItems)state.otherItems=[];state.otherItems.push(buildItem(it));renderTablaOther();}
+      else{state.items.push(buildItem(it));renderTabla();}
+      save();calcular();closeCatalog();window._catalogTarget='main';
+    };
+    d.appendChild(i);});c.appendChild(d);});
   document.getElementById('modal-catalog').classList.add('open');
 }
-function closeCatalog(){document.getElementById('modal-catalog').classList.remove('open');}
+function closeCatalog(){document.getElementById('modal-catalog').classList.remove('open');window._catalogTarget='main';}
 
 /* ============ CURRENCY ============ */
 function toUSD(a,m){
@@ -763,23 +860,24 @@ function calcular(){
   // Total (en moneda original) = Costo Unit. × Cant × Días  O  amortización CAPEX (CAPEX/Vida + mantenimiento)
   // Costo (USD-Paralelo) = Total × TC_moneda / TC_paralelo
   let costoVar=0;let porCat={Infraestructura:0,Logística:0,Agencia:0};
-  state.items.forEach(it=>{
+  const processItem=(it,isOther)=>{
     let totalOrig;
     if(it.propio && it.capex>0 && it.vida>0){
-      const am=it.capex/it.vida;
-      const mt=(it.capex*(num('br_mant_pct')/100))/(num('br_eventos_anio')||1);
-      totalOrig=am+mt; // en MONEDA seleccionada
-    } else {
-      totalOrig=(it.costo||0)*(it.cant||0)*(it.dias||0); // en MONEDA seleccionada
-    }
+      const am=it.capex/it.vida;const mt=(it.capex*(num('br_mant_pct')/100))/(num('br_eventos_anio')||1);totalOrig=am+mt;
+    } else {totalOrig=(it.costo||0)*(it.cant||0)*(it.dias||0);}
     const costoParalelo=itemToUSDParalelo(totalOrig,it.moneda);
     const row=document.querySelector(`tr[data-id="${it.id}"]`);
-    if(row){
-      const fTotal=row.querySelector('[data-r="total"]');if(fTotal)fTotal.textContent=monedaSymbol(it.moneda)+' '+fN(totalOrig);
-      const fPar=row.querySelector('[data-r="costpar"]');if(fPar)fPar.textContent='$ '+fN(costoParalelo);
-    }
+    if(row){const fT=row.querySelector('[data-r="total"]');if(fT)fT.textContent=monedaSymbol(it.moneda)+' '+fN(totalOrig);const fP=row.querySelector('[data-r="costpar"]');if(fP)fP.textContent='$ '+fN(costoParalelo);}
     costoVar+=costoParalelo;porCat[it.cat]=(porCat[it.cat]||0)+costoParalelo;
-  });
+    return costoParalelo;
+  };
+  state.items.forEach(it=>processItem(it,false));
+
+  // Otros costos
+  let costoOtros=0;
+  (state.otherItems||[]).forEach(it=>{costoOtros+=processItem(it,true);});
+  setVal('q_otros_base','$ '+fN(costoOtros));
+  setVal('q_total_proyecto','$ '+fN(costoFijoEvento+costoVar));
 
   const costoTotal=costoFijoEvento+costoVar;
   const dias=num('evento_dias')||1;
@@ -1100,14 +1198,14 @@ function renderBenchmark(){
 
 /* ============ PERSISTENCE ============ */
 function save(){
-  const snap={items:state.items,fixedCosts:state.fixedCosts,lastTab:state.lastTab,presChecks:state.presChecks||{},diasPresOverrides:state.diasPresOverrides||{},fields:{}};
-  ['cli_razon','cli_rif','cli_direccion','cli_contacto','cli_email','cli_tel_num','cli_tel_prefix','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','mg_pct_1','mg_pct_2','mg_pct_3','ing_dia_1','ing_dia_2','ing_dia_3','pres_moneda','pres_escenario'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
+  const snap={items:state.items,fixedCosts:state.fixedCosts,otherItems:state.otherItems||[],lastTab:state.lastTab,presChecks:state.presChecks||{},diasPresOverrides:state.diasPresOverrides||{},fields:{}};
+  ['cli_razon','cli_rif','cli_direccion','cli_contacto','cli_email','cli_tel_num','cli_tel_prefix','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','mg_pct_1','mg_pct_2','mg_pct_3','ing_dia_1','ing_dia_2','ing_dia_3','pres_moneda','pres_escenario','cads_razon','cads_rif','cads_direccion','cads_contacto','cads_telefono','cads_email'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
   ['iva_aplica','islr_aplica'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.checked;});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(snap));}catch(e){}
 }
 function cargarEstado(){
   try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;const s=JSON.parse(raw);
-    if(s.items)state.items=s.items;if(s.fixedCosts)state.fixedCosts=s.fixedCosts;if(s.presChecks)state.presChecks=s.presChecks;if(s.diasPresOverrides)state.diasPresOverrides=s.diasPresOverrides;
+    if(s.items)state.items=s.items;if(s.fixedCosts)state.fixedCosts=s.fixedCosts;if(s.otherItems)state.otherItems=s.otherItems;if(s.presChecks)state.presChecks=s.presChecks;if(s.diasPresOverrides)state.diasPresOverrides=s.diasPresOverrides;
     if(s.fields)Object.entries(s.fields).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
   }catch(e){console.warn(e);}
 }
