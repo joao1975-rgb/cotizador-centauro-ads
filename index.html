@@ -761,13 +761,6 @@ function calcular(){
   state.calc={costoVar,costoFijoEvento,costoTotal,cols,
     facturacionBs,porCat,capitalTrabajo,anticipoCobro,anticipoPago,dias,partidos,divisorDiario};
 
-  // Sync diario inputs when in margen mode
-  if(plMode==='margen'&&cols){
-    cols.forEach((col,i)=>{
-      const el=document.getElementById('ing_dia_'+(i+1));
-      if(el)el.value=Math.round(col.diarioPar*100)/100;
-    });
-  }
   if(state.lastTab==='margen')renderPL();
   if(state.lastTab==='dashboard')renderDashboard();
   if(state.lastTab==='cashflow')renderCashflow();
@@ -785,25 +778,17 @@ function switchPLMode(mode){
   if(mode==='margen'){
     mgInputs.forEach(el=>{el.disabled=false;el.style.opacity='1';});
     diaInputs.forEach(el=>{el.disabled=true;el.style.opacity='.5';});
-    // Sync diario from current margin calc
     calcular();
   } else {
     mgInputs.forEach(el=>{el.disabled=true;el.style.opacity='.5';});
     diaInputs.forEach(el=>{el.disabled=false;el.style.opacity='1';});
-    // Set diario inputs to current calculated values
-    if(state.calc&&state.calc.cols){
-      state.calc.cols.forEach((col,i)=>{
-        document.getElementById('ing_dia_'+(i+1)).value=Math.round(col.diarioPar*100)/100;
-      });
-    }
-    save();
+    // Show last calculated diario values (don't change them)
   }
 }
 
 function onMgInput(){
-  // Margen drives everything
   save();calcular();
-  // Sync diario display
+  // Sync diario display (read-only mirror)
   if(state.calc&&state.calc.cols){
     state.calc.cols.forEach((col,i)=>{
       document.getElementById('ing_dia_'+(i+1)).value=Math.round(col.diarioPar*100)/100;
@@ -812,7 +797,8 @@ function onMgInput(){
 }
 
 function onDiaInput(){
-  // Diario drives margin: Ingreso = diario × divisor, MB% = 1 - (Costo / Ingreso)
+  // Reverse: from diario, back-calculate MB%
+  // Ingreso = diario × divisor, MB% = 1 - (Costo / Ingreso)
   const costoTotal=state.calc?state.calc.costoTotal:0;
   const divisor=state.calc?state.calc.divisorDiario:34;
   [1,2,3].forEach(i=>{
