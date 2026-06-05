@@ -221,8 +221,8 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
           <div class="field"><label class="field-label">Email</label><input class="input" type="email" id="cli_email" placeholder="contacto@empresa.com" onchange="validarEmail(this);save()" oninput="validarEmail(this)"><span class="field-hint" id="cli_email_hint"></span></div>
           <div class="field"><label class="field-label">Teléfono</label>
             <div style="display:flex;gap:6px">
-              <select class="select" id="cli_tel_prefix" style="width:110px;flex-shrink:0" onchange="save()">
-                <option value="0412">0412/0422</option><option value="0414">0414/0424</option><option value="0416">0416/0426</option>
+              <select class="select" id="cli_tel_prefix" style="width:90px;flex-shrink:0" onchange="save()">
+                <option value="0412">0412</option><option value="0414">0414</option><option value="0416">0416</option><option value="0422">0422</option><option value="0424">0424</option><option value="0426">0426</option>
               </select>
               <input class="input" id="cli_tel_num" placeholder="1234567" maxlength="7" pattern="[0-9]{7}" oninput="validarTelefono(this);save()" onchange="validarTelefono(this);save()">
             </div>
@@ -291,7 +291,15 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
       <div class="card">
         <div class="grid grid-2">
           <div class="field"><label class="field-label">Contacto Comercial</label><input class="input" id="cads_contacto" value="Mercadeo Centauro ADS" onchange="save()"></div>
-          <div class="field"><label class="field-label">Teléfono</label><input class="input" id="cads_telefono" value="0424-2644335" onchange="save()"></div>
+          <div class="field"><label class="field-label">Teléfono</label>
+            <div style="display:flex;gap:6px">
+              <select class="select" id="cads_tel_prefix" style="width:90px;flex-shrink:0" onchange="save()">
+                <option value="0412">0412</option><option value="0414">0414</option><option value="0416">0416</option><option value="0422">0422</option><option value="0424" selected>0424</option><option value="0426">0426</option>
+              </select>
+              <input class="input" id="cads_tel_num" value="2644335" maxlength="7" oninput="validarTelefono2(this);save()" onchange="validarTelefono2(this);save()">
+            </div>
+            <span class="field-hint" id="cads_tel_hint"></span>
+          </div>
           <div class="field" style="grid-column:span 2"><label class="field-label">Email</label><input class="input" type="email" id="cads_email" value="mercadeo@centauroads.com" onchange="save()"></div>
         </div>
       </div>
@@ -541,11 +549,11 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-feature-sett
     <!-- Presupuesto Cliente (formato cotización) -->
     <div class="section-title">Vista Presupuesto al Cliente</div>
     <div class="table-wrap" id="pres-cliente-wrap">
-      <div class="table-toolbar" style="background:linear-gradient(135deg,rgba(139,63,183,0.15),rgba(245,158,11,0.08))">
-        <span style="font-size:14px;font-weight:700" id="pres-cli-title">COTIZACIÓN</span>
-        <span class="mono" style="font-size:12px;color:var(--text-2)" id="pres-cli-num"></span>
-      </div>
-      <div style="padding:16px 20px;font-size:13px;color:var(--text-1);line-height:1.7" id="pres-cli-datos"></div>
+      <!-- Brand header rendered by renderPresupuesto() -->
+      <div id="pres-cli-header-brand" style="border-radius:12px 12px 0 0;overflow:hidden"></div>
+      <div style="display:none" id="pres-cli-title"></div>
+      <div style="display:none" id="pres-cli-num"></div>
+      <div style="display:none" id="pres-cli-datos"></div>
       <div style="overflow-x:auto">
         <table class="table" id="tbl-pres-cli">
           <thead><tr><th style="min-width:240px">Descripción</th><th>Costo Unitario</th><th>Días</th><th>Cantidad</th><th>Total</th></tr></thead>
@@ -1199,7 +1207,7 @@ function renderBenchmark(){
 /* ============ PERSISTENCE ============ */
 function save(){
   const snap={items:state.items,fixedCosts:state.fixedCosts,otherItems:state.otherItems||[],lastTab:state.lastTab,presChecks:state.presChecks||{},diasPresOverrides:state.diasPresOverrides||{},fields:{}};
-  ['cli_razon','cli_rif','cli_direccion','cli_contacto','cli_email','cli_tel_num','cli_tel_prefix','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','mg_pct_1','mg_pct_2','mg_pct_3','ing_dia_1','ing_dia_2','ing_dia_3','pres_moneda','pres_escenario','cads_razon','cads_rif','cads_direccion','cads_contacto','cads_telefono','cads_email'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
+  ['cli_razon','cli_rif','cli_direccion','cli_contacto','cli_email','cli_tel_num','cli_tel_prefix','ev_nombre','ev_num','ev_inicio','ev_fin','ev_locaciones','tasa_bcv_usd','tasa_bcv_eur','tasa_paralelo','evento_dias','evento_partidos','conv_eur','iva_pct','islr_pct','cobro_anticipo','br_eventos_anio','br_vida_default','br_residual_pct','br_mant_pct','mg_pct_1','mg_pct_2','mg_pct_3','ing_dia_1','ing_dia_2','ing_dia_3','pres_moneda','pres_escenario','cads_razon','cads_rif','cads_direccion','cads_contacto','cads_tel_prefix','cads_tel_num','cads_email'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.value;});
   ['iva_aplica','islr_aplica'].forEach(id=>{const el=document.getElementById(id);if(el)snap.fields[id]=el.checked;});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(snap));}catch(e){}
 }
@@ -1237,6 +1245,14 @@ function validarTelefono(el){
   if(!v){hint.textContent='';hint.style.color='';return;}
   const valid=v.length===7&&/^\d{7}$/.test(v);
   hint.textContent=valid?'✓ Teléfono válido':`✗ Debe tener 7 dígitos (tiene ${v.length})`;
+  hint.style.color=valid?'var(--success)':'var(--danger)';
+}
+function validarTelefono2(el){
+  const v=el.value.replace(/\D/g,'');el.value=v.substring(0,7);
+  const hint=document.getElementById('cads_tel_hint');
+  if(!v||!hint){return;}
+  const valid=v.length===7&&/^\d{7}$/.test(v);
+  hint.textContent=valid?'✓ Válido':`✗ 7 dígitos (tiene ${v.length})`;
   hint.style.color=valid?'var(--success)':'var(--danger)';
 }
 
@@ -1378,10 +1394,12 @@ function renderPresupuesto(){
     <div style="text-align:right"><span style="font-size:12px;color:var(--text-2)">Contacto: ${esc(document.getElementById('cli_contacto').value||'—')}</span><br>
     <span style="font-size:12px;color:var(--text-2)">${esc(document.getElementById('cli_email').value||'')} · ${document.getElementById('cli_tel_prefix').value}-${document.getElementById('cli_tel_num').value||'0000000'}</span></div></div>`;
 
-  // Client-facing budget
-  document.getElementById('pres-cli-title').textContent='COTIZACIÓN · '+esc(document.getElementById('ev_nombre').value);
-  document.getElementById('pres-cli-num').textContent=document.getElementById('ev_num').value||'';
-  document.getElementById('pres-cli-datos').innerHTML=`<b>${esc(document.getElementById('cli_razon').value)}</b> · RIF: ${esc(document.getElementById('cli_rif').value)}<br>${esc(document.getElementById('cli_direccion').value)}<br>Attn: ${esc(document.getElementById('cli_contacto').value)} · ${esc(document.getElementById('cli_email').value)}<br>Evento: <b>${esc(document.getElementById('ev_nombre').value)}</b> · ${document.getElementById('ev_inicio').value} al ${document.getElementById('ev_fin').value} · ${esc(document.getElementById('ev_locaciones').value)}`;
+  // Client-facing budget header (branded)
+  const brandHdr=document.getElementById('pres-cli-header-brand');
+  if(brandHdr) brandHdr.innerHTML=buildPresHeader();
+  document.getElementById('pres-cli-title').textContent='';
+  document.getElementById('pres-cli-num').textContent='';
+  document.getElementById('pres-cli-datos').innerHTML='';
 
   const cliTb=document.getElementById('tbody-pres-cli');cliTb.innerHTML='';
   let cliTotal=0;
@@ -1402,31 +1420,182 @@ function setDiasPres(id,val){
 }
 
 /* ============ EXPORT PDF ============ */
+/* ============ BRAND HELPERS ============ */
+const BRAND={
+  purple:'#8B3FB7',purpleDark:'#5E2880',orange:'#F59E0B',orangeLight:'#FFB84D',
+  logoSVG:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" style="height:52px;display:block">
+    <text x="52" y="72" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="68" fill="#8B3FB7">C</text>
+    <text x="96" y="72" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="68" fill="#8B3FB7">ENT</text>
+    <text x="246" y="72" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="68" fill="#F59E0B">AURO</text>
+    <text x="210" y="92" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="22" fill="#8B3FB7">ADS</text>
+    <!-- C swoosh top -->
+    <path d="M8,18 Q52,2 52,40 Q52,2 96,12" stroke="#F59E0B" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <!-- C swoosh bottom -->
+    <path d="M8,82 Q52,98 52,60 Q52,98 96,88" stroke="#F59E0B" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <!-- Arrow -->
+    <path d="M0,50 L22,50 M14,42 L22,50 L14,58" stroke="#F59E0B" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`
+};
+
+function buildPresHeader(){
+  const razon=document.getElementById('cli_razon').value||'Cliente';
+  const rif=document.getElementById('cli_rif').value||'—';
+  const dir=document.getElementById('cli_direccion').value||'—';
+  const contacto=document.getElementById('cli_contacto').value||'—';
+  const email=document.getElementById('cli_email').value||'—';
+  const tel=(document.getElementById('cli_tel_prefix').value||'')+'-'+(document.getElementById('cli_tel_num').value||'—');
+  const evNombre=document.getElementById('ev_nombre').value||'Evento';
+  const cotNum=document.getElementById('ev_num').value||'—';
+  const inicio=document.getElementById('ev_inicio').value||'';
+  const fin=document.getElementById('ev_fin').value||'';
+  const loc=document.getElementById('ev_locaciones').value||'';
+  const cadsRazon=document.getElementById('cads_razon').value||'Centauro Marketing Solutions C.A.';
+  const cadsRif=document.getElementById('cads_rif').value||'J-507396797';
+  const cadsDir=document.getElementById('cads_direccion').value||'—';
+  const cadsTel=(document.getElementById('cads_tel_prefix')?.value||'0424')+'-'+(document.getElementById('cads_tel_num')?.value||'2644335');
+  const cadsEmail=document.getElementById('cads_email').value||'mercadeo@centauroads.com';
+  const moneda=getPresMonedaTC(document.getElementById('pres_moneda').value);
+
+  return `
+  <div style="background:#fff;color:#1a1a2e;font-family:'Segoe UI',Arial,sans-serif;max-width:900px;margin:0 auto;padding:0">
+    <!-- HEADER BRAND -->
+    <div style="background:linear-gradient(135deg,#8B3FB7 0%,#5E2880 100%);padding:22px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div style="color:#fff">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;opacity:.75;margin-bottom:2px">Oferta Comercial</div>
+        <div style="font-size:22px;font-weight:900;letter-spacing:-0.02em">${esc(evNombre)}</div>
+        <div style="font-size:12px;opacity:.8;margin-top:4px">Cotización N° <b>${esc(cotNum)}</b> · ${inicio} al ${fin}</div>
+      </div>
+      <div style="text-align:right;color:#fff;font-size:11px;opacity:.85">
+        <div style="font-size:16px;font-weight:800;opacity:1;margin-bottom:4px">${esc(cadsRazon)}</div>
+        <div>RIF: ${esc(cadsRif)}</div>
+        <div>${esc(cadsDir)}</div>
+        <div>${cadsTel} · ${esc(cadsEmail)}</div>
+      </div>
+    </div>
+    <!-- ORANGE STRIPE -->
+    <div style="background:#F59E0B;height:5px"></div>
+    <!-- DESTINATARIO -->
+    <div style="padding:20px 32px 12px;background:#f8f5ff;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:2px solid #ede0ff">
+      <div>
+        <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8B3FB7;font-weight:700;margin-bottom:4px">Cotización preparada para:</div>
+        <div style="font-size:16px;font-weight:800;color:#1a1a2e">${esc(razon)}</div>
+        <div style="font-size:12px;color:#555;margin-top:2px">RIF: ${esc(rif)} · ${esc(dir)}</div>
+        <div style="font-size:12px;color:#555">Attn: ${esc(contacto)} · ${esc(email)} · ${tel}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8B3FB7;font-weight:700;margin-bottom:4px">Locaciones</div>
+        <div style="font-size:13px;color:#1a1a2e;font-weight:600">${esc(loc)}</div>
+        <div style="margin-top:8px;display:inline-block;padding:6px 14px;background:#8B3FB7;color:#fff;border-radius:999px;font-size:11px;font-weight:700">Moneda: ${moneda.label}</div>
+      </div>
+    </div>`;
+}
+
 function exportPresupuestoPDF(){
-  const el=document.getElementById('pres-cliente-wrap');
-  const orig=document.body.innerHTML;
-  document.body.innerHTML=el.outerHTML;
-  document.body.style.background='#fff';document.body.style.color='#000';
-  window.print();
-  document.body.innerHTML=orig;document.body.style.background='';document.body.style.color='';
-  location.reload();
+  const moneda=getPresMonedaTC(document.getElementById('pres_moneda').value);
+  const m=moneda.sym;
+  const rows=[];
+  document.querySelectorAll('#tbody-pres-cli tr').forEach(tr=>{
+    const cells=tr.querySelectorAll('td');
+    if(cells.length<5)return;
+    rows.push({desc:cells[0].textContent.trim(),unit:cells[1].textContent.trim(),dias:cells[2].textContent.trim(),cant:cells[3].textContent.trim(),total:cells[4].textContent.trim()});
+  });
+  const total=document.getElementById('pres-cli-total').textContent.trim();
+  const ivaPct=document.getElementById('iva_aplica').checked?num('iva_pct'):0;
+  const ivaLbl=ivaPct>0?`IVA ${ivaPct}% incluido`:'Sin IVA';
+
+  const tableRows=rows.map((r,i)=>`
+    <tr style="background:${i%2===0?'#fff':'#faf7ff'}">
+      <td style="padding:10px 14px;font-weight:600;border-bottom:1px solid #ede0ff">${esc(r.desc)}</td>
+      <td style="padding:10px 14px;text-align:right;font-family:monospace;border-bottom:1px solid #ede0ff">${r.unit}</td>
+      <td style="padding:10px 14px;text-align:center;border-bottom:1px solid #ede0ff">${r.dias}</td>
+      <td style="padding:10px 14px;text-align:center;border-bottom:1px solid #ede0ff">${r.cant}</td>
+      <td style="padding:10px 14px;text-align:right;font-family:monospace;font-weight:700;border-bottom:1px solid #ede0ff">${r.total}</td>
+    </tr>`).join('');
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <title>Cotización ${document.getElementById('ev_num').value||''}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e}@page{margin:12mm}@media print{body{margin:0}}</style>
+  </head><body>
+  ${buildPresHeader()}
+  <!-- TABLE -->
+  <div style="padding:24px 32px">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:#8B3FB7;color:#fff">
+          <th style="padding:12px 14px;text-align:left;min-width:220px">Descripción</th>
+          <th style="padding:12px 14px;text-align:right">Precio Unitario</th>
+          <th style="padding:12px 14px;text-align:center">Días</th>
+          <th style="padding:12px 14px;text-align:center">Cant.</th>
+          <th style="padding:12px 14px;text-align:right">Total</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+      <tfoot>
+        <tr style="background:#5E2880;color:#fff">
+          <td colspan="4" style="padding:14px;font-weight:800;text-align:right;font-size:14px;letter-spacing:0.04em">TOTAL (${ivaLbl})</td>
+          <td style="padding:14px;text-align:right;font-weight:900;font-size:16px;font-family:monospace">${total}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <!-- FOOTER -->
+  <div style="margin:0 32px;padding:16px 0;border-top:3px solid #F59E0B;display:flex;justify-content:space-between;font-size:11px;color:#888">
+    <span>${document.getElementById('cads_razon').value} · RIF: ${document.getElementById('cads_rif').value}</span>
+    <span>${document.getElementById('cads_email').value} · ${(document.getElementById('cads_tel_prefix')?.value||'0424')+'-'+(document.getElementById('cads_tel_num')?.value||'2644335')}</span>
+    <span>Válido por 30 días desde emisión</span>
+  </div>
+  <!-- TERMS -->
+  <div style="margin:8px 32px 0;padding:10px 14px;background:#faf7ff;border-radius:8px;font-size:11px;color:#666;line-height:1.6">
+    <b style="color:#8B3FB7">Términos y Condiciones:</b> Los precios están expresados en ${moneda.label}.
+    Pago: 50% al confirmar y 50% antes del inicio. Precios sujetos a variación cambiaria.
+    El servicio incluye instalación y desmontaje en la fecha acordada.
+  </div>
+  <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),1000);}<\/script>
+  </body></html>`;
+
+  const win=window.open('','_blank','width=900,height=700');
+  win.document.write(html);win.document.close();
 }
 
 /* ============ EXPORT EXCEL ============ */
 function exportPresupuestoExcel(){
-  const moneda=document.getElementById('pres_moneda').value;
-  const m=getPresMonedaTC(moneda);
-  let csv='Descripción,Costo Unitario,Días,Cantidad,Total\n';
+  const moneda=getPresMonedaTC(document.getElementById('pres_moneda').value);
+  const evNombre=document.getElementById('ev_nombre').value||'Evento';
+  const cotNum=document.getElementById('ev_num').value||'—';
+  const cadsRazon=document.getElementById('cads_razon').value||'Centauro ADS';
+  const cadsRif=document.getElementById('cads_rif').value||'J-507396797';
+  const cadsEmail=document.getElementById('cads_email').value||'mercadeo@centauroads.com';
+  const cadsTel=(document.getElementById('cads_tel_prefix')?.value||'0424')+'-'+(document.getElementById('cads_tel_num')?.value||'2644335');
+  const ivaPct=document.getElementById('iva_aplica').checked?num('iva_pct'):0;
+
+  // BOM + Header info
+  let csv='﻿';
+  csv+=`"CENTAURO MARKETING SOLUTIONS C.A.","","","",""\n`;
+  csv+=`"RIF: ${cadsRif}","","","",""\n`;
+  csv+=`"${cadsEmail}  |  ${cadsTel}","","","",""\n`;
+  csv+=`"","","","",""\n`;
+  csv+=`"COTIZACIÓN N°: ${cotNum}","","","",""\n`;
+  csv+=`"EVENTO: ${evNombre}","","","",""\n`;
+  csv+=`"CLIENTE: ${document.getElementById('cli_razon').value||'—'}  |  RIF: ${document.getElementById('cli_rif').value||'—'}","","","",""\n`;
+  csv+=`"MONEDA: ${moneda.label}  |  IVA: ${ivaPct>0?ivaPct+'%':'No aplica'}","","","",""\n`;
+  csv+=`"","","","",""\n`;
+  csv+=`"DESCRIPCIÓN","PRECIO UNITARIO","DÍAS","CANT.","TOTAL"\n`;
+
   document.querySelectorAll('#tbody-pres-cli tr').forEach(tr=>{
     const cells=tr.querySelectorAll('td');
+    if(cells.length<5)return;
     const vals=Array.from(cells).map(c=>'"'+c.textContent.trim().replace(/"/g,'""')+'"');
     csv+=vals.join(',')+'\n';
   });
-  const totalEl=document.getElementById('pres-cli-total');
-  csv+='TOTAL,,,,'+totalEl.textContent+'\n';
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+
+  csv+=`"","","","",""\n`;
+  csv+=`"","","","TOTAL","${document.getElementById('pres-cli-total').textContent.trim()}"\n`;
+  csv+=`"","","","",""\n`;
+  csv+=`"Precios en ${moneda.label}. Válido 30 días.","","","",""\n`;
+
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=`Presupuesto_${(document.getElementById('cli_razon').value||'cliente').replace(/\W+/g,'_')}_${Date.now()}.csv`;
+  a.download=`Cotizacion_${(document.getElementById('cli_razon').value||'cliente').replace(/\W+/g,'_')}_${Date.now()}.csv`;
   a.click();
 }
 
